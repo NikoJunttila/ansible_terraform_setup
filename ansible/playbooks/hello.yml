@@ -1,0 +1,11 @@
+---
+- name: Hello World Ping
+  hosts: all
+  gather_facts: no
+  tasks:
+    - name: Ping the host
+      ping:
+
+    - name: Print hello message
+      debug:
+        msg: "Hello from Ansible on {{ inventory_hostname }}!"
