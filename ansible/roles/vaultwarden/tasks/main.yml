@@ -1,0 +1,33 @@
+---
+- name: Create Vaultwarden data directory
+  file:
+    path: /opt/vaultwarden/data
+    state: directory
+    mode: '0755'
+    owner: ubuntu
+    group: ubuntu
+
+- name: Create Vaultwarden systemd service
+  copy:
+    dest: /etc/systemd/system/vaultwarden.service
+    content: |
+      [Unit]
+      Description=Vaultwarden Container
+      After=network.target
+
+      [Service]
+      Restart=always
+      ExecStart=/usr/bin/podman run --name vaultwarden --rm -p 80:80 -v /opt/vaultwarden/data:/data docker.io/vaultwarden/server:latest
+      ExecStop=/usr/bin/podman stop vaultwarden
+
+      [Install]
+      WantedBy=multi-user.target
+    mode: '0644'
+  notify: Reload systemd
+
+- name: Enable and start Vaultwarden service
+  systemd:
+    name: vaultwarden
+    state: started
+    enabled: yes
+    daemon_reload: yes
