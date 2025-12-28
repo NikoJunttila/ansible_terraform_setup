@@ -1,0 +1,8 @@
+# Copy this file to terraform.tfvars and customize
+
+region          = "eu-north-1"
+instance_type   = "t4g.nano"       # ~$3/month (cheapest ARM)
+key_name        = "vps-proxy-key"
+public_key_path = "~/.ssh/vps-proxy.pub"
+allowed_ssh_cidr = "0.0.0.0/0"     # Restrict to your IP for better security
+instance_name   = "reverse-proxy-vps"

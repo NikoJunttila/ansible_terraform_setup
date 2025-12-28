@@ -1,6 +1,16 @@
 #!/bin/bash
 set -e
 
+# Tailscale auth key: use command line argument if provided, otherwise check environment variable
+TAILSCALE_KEY="${1:-$TAILSCALE_AUTHKEY}"
+
+if [ -z "$TAILSCALE_KEY" ]; then
+    echo "Error: Tailscale auth key is required."
+    echo "Usage: $0 <tailscale_authkey>"
+    echo "   or: TAILSCALE_AUTHKEY=<key> $0"
+    exit 1
+fi
+
 # Go to terraform directory to get outputs
 cd "$(dirname "$0")/../terraform"
 
@@ -23,6 +33,7 @@ cd ../ansible
 ansible-playbook playbooks/site.yml \
     -i "$IP," \
     --private-key "$PRIVATE_KEY_PATH" \
-    -u ubuntu
+    -u ubuntu \
+    --extra-vars "tailscale_authkey=$TAILSCALE_KEY"
 
 echo "Provisioning complete!"

@@ -1,0 +1,23 @@
+# Managed by Ansible - do not edit manually
+
+{% for site in caddy_sites %}
+{{ site.domain }} {
+    reverse_proxy {{ site.backend }} {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+}
+
+{% endfor %}
+
+{# Legacy single-site support for backwards compatibility #}
+{% if caddy_sites | length == 0 and caddy_domain and caddy_backend_ip %}
+{{ caddy_domain }} {
+    reverse_proxy {{ caddy_backend_ip }}:{{ caddy_backend_port }} {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+}
+{% endif %}
