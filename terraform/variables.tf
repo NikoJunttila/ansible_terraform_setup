@@ -5,9 +5,9 @@ variable "region" {
 }
 
 variable "instance_type" {
-  description = "EC2 Instance Type (ARM based)"
+  description = "EC2 Instance Type (ARM based) - t4g.small recommended for all apps"
   type        = string
-  default     = "t4g.nano"
+  default     = "t4g.small"  # 2GB RAM - needed for Karakeep/Meilisearch
 }
 
 variable "key_name" {
