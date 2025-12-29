@@ -15,7 +15,7 @@ selfhosting list:
 pi-hole
 vaultwarden
 jellyfin
-https://github.com/karakeep-app/karakeep
+https://github.com/go-shiori/shiori
 qbittorrent?
 
 

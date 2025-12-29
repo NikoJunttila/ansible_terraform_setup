@@ -6,5 +6,9 @@
 
   roles:
     - podman
-    - vaultwarden
     - tailscale
+    - vaultwarden
+    - pihole
+    - jellyfin
+    - shiori
+    - qbittorrent

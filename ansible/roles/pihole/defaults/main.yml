@@ -1,0 +1,13 @@
+---
+# Pi-hole admin password
+pihole_password: "changeme"
+
+# Upstream DNS servers
+pihole_dns1: "1.1.1.1"
+pihole_dns2: "1.0.0.1"
+
+# Timezone
+pihole_timezone: "Europe/Helsinki"
+
+# Web interface port (8081 to avoid conflict with Vaultwarden on 80)
+pihole_web_port: 8081

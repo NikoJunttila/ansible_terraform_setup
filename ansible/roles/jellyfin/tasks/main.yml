@@ -1,0 +1,26 @@
+---
+- name: Pull Jellyfin image
+  command: podman pull docker.io/jellyfin/jellyfin:latest
+  register: pull_result
+  changed_when: "'already present' not in pull_result.stdout"
+  async: 600
+  poll: 30
+
+- name: Create media directory
+  file:
+    path: "{{ jellyfin_media_path }}"
+    state: directory
+    mode: '0755'
+
+- name: Create and start Jellyfin container
+  command: >
+    podman run -d --name jellyfin
+    --replace
+    -p 8096:8096/tcp
+    -e TZ={{ jellyfin_timezone }}
+    -v jellyfin-config:/config
+    -v jellyfin-cache:/cache
+    -v {{ jellyfin_media_path }}:/media:ro
+    docker.io/jellyfin/jellyfin:latest
+  register: jellyfin_result
+  changed_when: jellyfin_result.rc == 0

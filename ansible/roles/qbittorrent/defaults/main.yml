@@ -1,0 +1,10 @@
+---
+# Timezone
+qbittorrent_timezone: "Europe/Helsinki"
+
+# Download path on host
+qbittorrent_download_path: "/downloads"
+
+# User/group IDs
+qbittorrent_puid: 1000
+qbittorrent_pgid: 1000

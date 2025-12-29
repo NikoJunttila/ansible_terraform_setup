@@ -1,0 +1,6 @@
+---
+# Timezone
+jellyfin_timezone: "Europe/Helsinki"
+
+# Media path on host (will be mounted read-only)
+jellyfin_media_path: "/media"

@@ -1,0 +1,28 @@
+---
+- name: Pull qBittorrent image
+  command: podman pull docker.io/linuxserver/qbittorrent:latest
+  register: pull_result
+  changed_when: "'already present' not in pull_result.stdout"
+  async: 600
+  poll: 30
+
+- name: Create downloads directory
+  file:
+    path: "{{ qbittorrent_download_path }}"
+    state: directory
+    mode: '0755'
+
+- name: Create and start qBittorrent container
+  command: >
+    podman run -d --name qbittorrent
+    --replace
+    -p 8080:8080/tcp -p 6881:6881/tcp -p 6881:6881/udp
+    -e TZ={{ qbittorrent_timezone }}
+    -e PUID={{ qbittorrent_puid }}
+    -e PGID={{ qbittorrent_pgid }}
+    -e WEBUI_PORT=8080
+    -v qbittorrent-config:/config
+    -v {{ qbittorrent_download_path }}:/downloads
+    docker.io/linuxserver/qbittorrent:latest
+  register: qbittorrent_result
+  changed_when: qbittorrent_result.rc == 0

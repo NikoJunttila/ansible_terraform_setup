@@ -1,0 +1,20 @@
+---
+- name: Create Shiori data directory
+  file:
+    path: /opt/shiori
+    state: directory
+    mode: '0755'
+
+- name: Create and start Shiori container
+  containers.podman.podman_container:
+    name: shiori-app
+    image: ghcr.io/go-shiori/shiori:{{ shiori_version }}
+    state: started
+    recreate: yes
+    publish:
+      - "{{ shiori_port }}:8080"
+    env:
+      SHIORI_DIR: /srv/shiori
+      TZ: "{{ shiori_timezone }}"
+    volume:
+      - shiori-data:/srv/shiori
