@@ -6,6 +6,7 @@
 
   roles:
     - podman
+    - discordbot
     - tailscale
     - vaultwarden
     #- pihole

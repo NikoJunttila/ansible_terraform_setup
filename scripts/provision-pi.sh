@@ -20,6 +20,7 @@ cd "$(dirname "$0")/../ansible"
 # Please ensure you have run 'ssh-copy-id -i ~/.ssh/ansible-lab ubuntu@pihole' first.
 ansible-playbook playbooks/pi.yml \
     -i inventory/pi.ini \
+    --ask-vault-pass \
     --extra-vars "tailscale_authkey=$TAILSCALE_KEY" \
     -K
 

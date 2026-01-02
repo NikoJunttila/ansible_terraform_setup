@@ -1,0 +1,38 @@
+---
+- name: Load vault variables
+  include_vars: vault.yml
+
+- name: Ensure git is installed
+  apt:
+    name: git
+    state: present
+
+- name: Clone TPX discord bot
+  git:
+    repo: 'https://github.com/NikoJunttila/TPX-discordBot'
+    dest: /opt/tpxbot
+    version: main
+    force: yes
+  register: git_clone
+
+- name: Create .env file
+  template:
+    src: .env.j2
+    dest: /opt/tpxbot/.env
+  register: env_file
+
+- name: Build tpx bot
+  containers.podman.podman_image:
+    name: tpx-bot
+    tag: latest
+    path: /opt/tpxbot
+    force: "{{ git_clone.changed }}"
+  register: image_build
+
+- name: Run tpxbot container
+  containers.podman.podman_container:
+    name: tpx-bot
+    image: tpx-bot:latest
+    state: started
+    env_file: /opt/tpxbot/.env
+    recreate: "{{ git_clone.changed or env_file.changed or image_build.changed }}"
