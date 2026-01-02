@@ -1,0 +1,30 @@
+---
+- name: Ensure git is installed
+  apt:
+    name: git
+    state: present
+
+- name: Clone useranalytics-svelte repository
+  git:
+    repo: "{{ useranalytics_svelte_repo }}"
+    dest: "{{ useranalytics_svelte_dest }}"
+    version: "{{ useranalytics_svelte_version }}"
+    force: yes
+  register: git_clone
+
+- name: Build useranalytics-svelte image
+  containers.podman.podman_image:
+    name: useranalytics-svelte
+    tag: latest
+    path: "{{ useranalytics_svelte_dest }}"
+    force: "{{ git_clone.changed }}"
+  register: image_build
+
+- name: Run useranalytics-svelte container
+  containers.podman.podman_container:
+    name: useranalytics-svelte
+    image: useranalytics-svelte:latest
+    state: started
+    ports:
+      - "{{ useranalytics_svelte_port }}:{{ useranalytics_svelte_container_port }}"
+    recreate: "{{ git_clone.changed or image_build.changed }}"

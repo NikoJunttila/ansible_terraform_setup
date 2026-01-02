@@ -64,14 +64,14 @@ terraform apply
 
 ```bash
 # Get a Tailscale auth key from https://login.tailscale.com/admin/settings/keys
+add to ENV variables or pass to script
 ./scripts/provision.sh tskey-auth-xxxxx
 ```
 
 ### 1.5 Note the Tailscale IP
-TODO script to get this ip
+The `scripts/provision.sh` script will automatically print the Tailscale IP after it finishes. You can also get it manually:
 ```bash
-ssh ubuntu@<pi-public-ip>
-tailscale ip -4
+ssh -i ~/.ssh/ansible-lab ubuntu@<pi-public-ip> "tailscale ip -4"
 # Example: 100.100.100.2
 ```
 

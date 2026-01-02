@@ -1,0 +1,6 @@
+---
+useranalytics_svelte_repo: "https://github.com/NikoJunttila/useranalytics-svelte.git"
+useranalytics_svelte_dest: "/opt/useranalytics-svelte"
+useranalytics_svelte_port: 8102
+useranalytics_svelte_container_port: 3000
+useranalytics_svelte_version: master

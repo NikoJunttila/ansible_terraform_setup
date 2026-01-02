@@ -1,47 +1,53 @@
 # ARM Ansible Lab
 Project template for Ansible and Terraform.
 
-next steps:
-figure out how to use tailscale so we can proxy trafic from a VPS to local rasperry
-https://tailscale.com/pricing
-
 main goal of this project is to have a selfhosting server that can be accessed from anywhere.
 for now the selfhosting server will be a raspberry pi 5 in my home network so i don't want to open ports on my router. and use tailscale to access it from anywhere.
 
 
 
-selfhosting list:
 
-pi-hole
-vaultwarden
-jellyfin
-https://github.com/go-shiori/shiori
-qbittorrent?
+## Raspberry Pi Local Setup
 
+Follow these steps to configure your Raspberry Pi 5 for this playbook.
 
+### 1. OS Installation
+1.  Download **Raspberry Pi Imager**.
+2.  Choose OS: **Raspberry Pi OS (64-bit)** (Lite is recommended for servers).
+3.  Choose Storage: Your SD card / NVMe drive.
+4.  **Settings (Gear Icon)**:
+    -   **Set Hostname**: `raspberrypi` (or your preferred name).
+    -   **Enable SSH**: Use password authentication (we will switch to keys later).
+    -   **Set usage**: username `pi`.
+    -   **Configure Wireless LAN**: If using Wi-Fi (Server is recommended on Ethernet).
+5.  Write the image.
 
-ports problems.
+### 2. Connect to the Pi
+1.  Boot the Pi and connect it to your network.
+2.  Find its IP address (check your router's DHCP list).
+3.  Copy your SSH key to the Pi for passwordless access:
+    ```bash
+    ssh-copy-id pi@<RASPBERRY_PI_IP>
+    ```
 
-Found the issue! Your security group only allows inbound traffic on ports 22 (SSH), 80 (HTTP), and 443 (HTTPS). Port 8443 is not open, which is why external access fails.
+### 3. Configure Ansible Inventory
+Create a new inventory file `ansible/inventory/pi.ini`:
 
-You have two options:
+```ini
+[pi]
+<RASPBERRY_PI_IP> ansible_user=pi ansible_ssh_private_key_file=~/.ssh/id_rsa verify_host_key_dns=no
+```
+*(Replace `<RASPBERRY_PI_IP>` with the actual IP address).*
 
-Option 1: Add port 8443 to the security group
-I can add an ingress rule for port 8443 in 
-security.tf
-:
+### 4. Run the Playbook
+Run the Ansible playbook to provision the Pi:
 
-hcl
-ingress {
-  description = "Custom port 8443"
-  from_port   = 8443
-  to_port     = 8443
-  protocol    = "tcp"
-  cidr_blocks = ["0.0.0.0/0"]
-}
-Then run terraform apply to update the security group.
+```bash
+cd ansible
+ansible-playbook -i inventory/pi.ini playbooks/site.yml --ask-become-pass
+```
+-   `--ask-become-pass`: Prompts for the `sudo` password (the one you set in step 1).
 
-
-tldr:
-update this /ansible/group_vars/vps.yml
-to hold all domains and backends
+### Troubleshooting
+-   **SSH Access**: Ensure you can `ssh pi@<IP>` without a password before running Ansible.
+-   **Python**: Ansible requires Python on the target. Raspberry Pi OS comes with it by default.

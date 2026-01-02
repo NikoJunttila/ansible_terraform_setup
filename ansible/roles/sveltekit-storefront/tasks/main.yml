@@ -1,0 +1,37 @@
+---
+- name: Ensure git is installed
+  apt:
+    name: git
+    state: present
+
+- name: Clone sveltekit-storefront repository
+  git:
+    repo: 'https://github.com/NikoJunttila/sveltekit-storefront.git'
+    dest: /opt/sveltekit-storefront
+    version: master
+    force: yes
+  register: git_clone
+
+- name: Create .env file
+  template:
+    src: .env.j2
+    dest: /opt/sveltekit-storefront/.env
+  register: env_file
+
+- name: Build sveltekit-storefront image
+  containers.podman.podman_image:
+    name: sveltekit-storefront
+    tag: latest
+    path: /opt/sveltekit-storefront
+    force: "{{ git_clone.changed }}"
+  register: image_build
+
+- name: Run sveltekit-storefront container
+  containers.podman.podman_container:
+    name: storefront
+    image: sveltekit-storefront:latest
+    state: started
+    ports:
+      - "{{ sveltekit_storefront_port }}:3000"
+    env_file: /opt/sveltekit-storefront/.env
+    recreate: "{{ git_clone.changed or env_file.changed or image_build.changed }}"

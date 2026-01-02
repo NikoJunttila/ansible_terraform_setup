@@ -37,3 +37,11 @@ ansible-playbook playbooks/site.yml \
     --extra-vars "tailscale_authkey=$TAILSCALE_KEY"
 
 echo "Provisioning complete!"
+echo ""
+echo "================================================"
+echo "Tailscale IPv4 Address:"
+ssh -i "$PRIVATE_KEY_PATH" -o StrictHostKeyChecking=no ubuntu@"$IP" "tailscale ip -4"
+echo "================================================"
+echo ""
+echo "Use this IP as 'backend_ip' in ansible/group_vars/vps.yml"
+echo ""

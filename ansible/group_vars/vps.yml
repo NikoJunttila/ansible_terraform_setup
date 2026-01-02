@@ -1,4 +1,6 @@
----
+# Centralized backend IP (e.g., your Raspberry Pi Tailscale IP)
+backend_ip: "100.66.220.13"
+
 # VPS Caddy Sites Configuration
 # 
 # Define all your reverse proxy sites here.
@@ -7,13 +9,13 @@
 caddy_sites:
   # Example sites - customize for your setup
   - domain: passwords.pi.junttila.dev
-    backend: "100.95.9.62:80"
+    backend: "{{ backend_ip }}:80"
   
-  # - domain: app.pi.junttila.dev
-  #   backend: "100.x.x.x:3000"
+  - domain: analytics.pi.junttila.dev
+    backend: "{{ backend_ip }}:8102"
   
   # - domain: grafana.pi.junttila.dev  
-  #   backend: "100.x.x.x:3001"
+  #   backend: "{{ backend_ip }}:3001"
   
   # - domain: homeassistant.pi.junttila.dev
-  #   backend: "100.x.x.x:8123"
+  #   backend: "{{ backend_ip }}:8123"

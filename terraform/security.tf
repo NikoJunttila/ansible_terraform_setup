@@ -70,6 +70,15 @@ resource "aws_security_group" "lab_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # UserAnalytics SvelteKit
+  ingress {
+    description = "UserAnalytics SvelteKit"
+    from_port   = 8102
+    to_port     = 8102
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   # qBittorrent
   ingress {
     description = "qBittorrent Web UI"

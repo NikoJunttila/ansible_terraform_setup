@@ -5,9 +5,9 @@ shiori_version: "latest"
 # Helper for local access (Podman routes 8080->8080)
 shiori_port: 8100
 
-# Basic auth (environment variables for the container)
-shiori_admin_username: "admin"
-shiori_admin_password: "admin_password"
+# Default credentials for first login: shiori / gopher
+# Basic auth credentials are NOT supported via environment variables for Shiori.
+# You must create accounts via the web UI or CLI.
 
 # Timezone
 shiori_timezone: "Europe/Helsinki"
