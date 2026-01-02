@@ -1,15 +1,4 @@
 ---
-# List of sites to proxy
-# Each site has a domain and backend (Tailscale IP:port)
-#
-# Example:
-# caddy_sites:
-#   - domain: vaultwarden.pi.junttila.dev
-#     backend: "100.x.x.x:80"
-#   - domain: app.pi.junttila.dev
-#     backend: "100.x.x.x:3000"
-#   - domain: grafana.pi.junttila.dev
-#     backend: "100.x.x.x:3001"
 
 caddy_sites: []
 

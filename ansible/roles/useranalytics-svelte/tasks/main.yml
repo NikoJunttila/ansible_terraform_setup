@@ -1,4 +1,3 @@
----
 - name: Ensure git is installed
   apt:
     name: git
@@ -18,6 +17,8 @@
     tag: latest
     path: "{{ useranalytics_svelte_dest }}"
     force: "{{ git_clone.changed }}"
+    build:
+      extra_args: "--platform=linux/arm64 --security-opt seccomp=unconfined"
   register: image_build
 
 - name: Run useranalytics-svelte container
@@ -28,3 +29,5 @@
     ports:
       - "{{ useranalytics_svelte_port }}:{{ useranalytics_svelte_container_port }}"
     recreate: "{{ git_clone.changed or image_build.changed }}"
+    security_opt:
+      - seccomp=unconfined

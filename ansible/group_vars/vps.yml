@@ -1,5 +1,5 @@
 # Centralized backend IP (e.g., your Raspberry Pi Tailscale IP)
-backend_ip: "100.66.220.13"
+backend_ip: "100.120.189.53"
 
 # VPS Caddy Sites Configuration
 # 
@@ -14,8 +14,8 @@ caddy_sites:
   - domain: analytics.pi.junttila.dev
     backend: "{{ backend_ip }}:8102"
   
-  # - domain: grafana.pi.junttila.dev  
-  #   backend: "{{ backend_ip }}:3001"
+  - domain: bookmarks.pi.junttila.dev  
+    backend: "{{ backend_ip }}:8100"
   
   # - domain: homeassistant.pi.junttila.dev
   #   backend: "{{ backend_ip }}:8123"

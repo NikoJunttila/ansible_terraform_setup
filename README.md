@@ -27,7 +27,7 @@ Follow these steps to configure your Raspberry Pi 5 for this playbook.
 2.  Find its IP address (check your router's DHCP list).
 3.  Copy your SSH key to the Pi for passwordless access:
     ```bash
-    ssh-copy-id pi@<RASPBERRY_PI_IP>
+    ssh-copy-id -i ~/.ssh/ansible-lab.pub pi@<RASPBERRY_PI_IP>
     ```
 
 ### 3. Configure Ansible Inventory

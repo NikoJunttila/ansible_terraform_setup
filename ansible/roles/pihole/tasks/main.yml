@@ -1,11 +1,4 @@
 ---
-- name: Pull Pi-hole image
-  command: podman pull docker.io/pihole/pihole:latest
-  register: pull_result
-  changed_when: "'already present' not in pull_result.stdout"
-  async: 600
-  poll: 30
-
 - name: Stop systemd-resolved (conflicts with port 53)
   systemd:
     name: systemd-resolved
@@ -22,15 +15,20 @@
     mode: '0644'
 
 - name: Create and start Pi-hole container
-  command: >
-    podman run -d --name pihole
-    --replace
-    -p 53:53/tcp -p 53:53/udp -p {{ pihole_web_port }}:80/tcp
-    -e TZ={{ pihole_timezone }}
-    -e WEBPASSWORD={{ pihole_password }}
-    -e PIHOLE_DNS_={{ pihole_dns1 }};{{ pihole_dns2 }}
-    -v pihole-data:/etc/pihole
-    -v pihole-dnsmasq:/etc/dnsmasq.d
-    docker.io/pihole/pihole:latest
-  register: pihole_result
-  changed_when: pihole_result.rc == 0
+  containers.podman.podman_container:
+    name: pihole
+    image: docker.io/pihole/pihole:latest
+    state: started
+    recreate: yes
+    restart_policy: always
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "{{ pihole_web_port }}:80/tcp"
+    env:
+      TZ: "{{ pihole_timezone }}"
+      WEBPASSWORD: "{{ pihole_password }}"
+      PIHOLE_DNS_: "{{ pihole_dns1 }};{{ pihole_dns2 }}"
+    volumes:
+      - pihole-data:/etc/pihole
+      - pihole-dnsmasq:/etc/dnsmasq.d

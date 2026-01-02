@@ -1,11 +1,4 @@
 ---
-- name: Pull Jellyfin image
-  command: podman pull docker.io/jellyfin/jellyfin:latest
-  register: pull_result
-  changed_when: "'already present' not in pull_result.stdout"
-  async: 600
-  poll: 30
-
 - name: Create media directory
   file:
     path: "{{ jellyfin_media_path }}"
@@ -13,14 +6,20 @@
     mode: '0755'
 
 - name: Create and start Jellyfin container
-  command: >
-    podman run -d --name jellyfin
-    --replace
-    -p 8096:8096/tcp
-    -e TZ={{ jellyfin_timezone }}
-    -v jellyfin-config:/config
-    -v jellyfin-cache:/cache
-    -v {{ jellyfin_media_path }}:/media:ro
-    docker.io/jellyfin/jellyfin:latest
-  register: jellyfin_result
-  changed_when: jellyfin_result.rc == 0
+  containers.podman.podman_container:
+    name: jellyfin
+    image: docker.io/jellyfin/jellyfin:latest
+    state: started
+    recreate: yes
+    restart_policy: always
+    ports:
+      - "8096:8096"
+    env:
+      TZ: "{{ jellyfin_timezone }}"
+    volumes:
+      - jellyfin-config:/config
+      - jellyfin-cache:/cache
+      - "{{ jellyfin_media_path }}:/media:ro"
+    # Added platform to help with architecture detection issues on ARM64
+    # This specifically helps if the host architecture detection is ambiguous
+    # platform: linux/arm64
