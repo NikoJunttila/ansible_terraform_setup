@@ -7,15 +7,18 @@ backend_ip: "100.120.189.53"
 # Each site needs a domain pointing to the VPS public IP in DNS.
 
 caddy_sites:
-  # Example sites - customize for your setup
   - domain: passwords.pi.junttila.dev
     backend: "{{ backend_ip }}:80"
   
   - domain: analytics.pi.junttila.dev
     backend: "{{ backend_ip }}:8102"
-  
+  # - domain: analytics.junttila.dev  
+  #   backend: "{{ backend_ip }}:8102"
   - domain: bookmarks.pi.junttila.dev  
     backend: "{{ backend_ip }}:8100"
-  
-  # - domain: homeassistant.pi.junttila.dev
-  #   backend: "{{ backend_ip }}:8123"
+
+  - domain: backend.pi.junttila.dev
+    backend: "{{ backend_ip }}:8000"
+
+  # - domain: pocket.pi.junttila.dev
+  #   backend: "{{ backend_ip }}:7101"

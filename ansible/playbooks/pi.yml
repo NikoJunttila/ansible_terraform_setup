@@ -13,4 +13,5 @@
     #- jellyfin
     - shiori
     #- qbittorrent
+    - useranalytics-backend
     - useranalytics-svelte

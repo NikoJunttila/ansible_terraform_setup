@@ -7,13 +7,18 @@
     name: git
     state: present
 
-- name: Clone TPX discord bot
+- name: Check for updates from GitHub
   git:
     repo: 'https://github.com/NikoJunttila/TPX-discordBot'
     dest: /opt/tpxbot
     version: main
     force: yes
+    update: yes
   register: git_clone
+
+- name: Display update status
+  debug:
+    msg: "{{ 'New commits found - will rebuild and redeploy' if git_clone.changed else 'No updates found - using existing deployment' }}"
 
 - name: Create .env file
   template:

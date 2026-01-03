@@ -3,13 +3,18 @@
     name: git
     state: present
 
-- name: Clone useranalytics-svelte repository
+- name: Check for updates from GitHub (frontend)
   git:
     repo: "{{ useranalytics_svelte_repo }}"
     dest: "{{ useranalytics_svelte_dest }}"
     version: "{{ useranalytics_svelte_version }}"
     force: yes
+    update: yes
   register: git_clone
+
+- name: Display update status (frontend)
+  debug:
+    msg: "{{ 'Frontend: New commits found - will rebuild and redeploy' if git_clone.changed else 'Frontend: No updates found - using existing deployment' }}"
 
 - name: Build useranalytics-svelte image
   containers.podman.podman_image:
@@ -28,6 +33,14 @@
     state: started
     ports:
       - "{{ useranalytics_svelte_port }}:{{ useranalytics_svelte_container_port }}"
+    env:
+      NODE_ENV: "{{ useranalytics_svelte_node_env }}"
+      PUBLIC_ENDPOINT: "{{ useranalytics_svelte_public_endpoint }}"
+      PUBLIC_INTERNAL_ENDPOINT: "{{ useranalytics_svelte_public_internal_endpoint }}"
+      PUBLIC_EXAMPLE_ID: "{{ useranalytics_svelte_public_example_id }}"
+      PUBLIC_JS_DELIVR_URL: "{{ useranalytics_svelte_public_js_delivr_url }}"
+    etc_hosts:
+      host.containers.internal: "{{ ansible_default_ipv4.address }}"
     recreate: "{{ git_clone.changed or image_build.changed }}"
     security_opt:
       - seccomp=unconfined

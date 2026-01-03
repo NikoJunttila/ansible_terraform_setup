@@ -1,0 +1,49 @@
+---
+- name: Load vault variables
+  include_vars: vault.yml
+
+- name: Ensure git is installed
+  apt:
+    name: git
+    state: present
+
+- name: Check for updates from GitHub (backend)
+  git:
+    repo: "{{ useranalytics_backend_repo }}"
+    dest: "{{ useranalytics_backend_dest }}"
+    version: "{{ useranalytics_backend_version }}"
+    force: yes
+    update: yes
+  register: git_clone
+
+- name: Display update status (backend)
+  debug:
+    msg: "{{ 'Backend: New commits found - will rebuild and redeploy' if git_clone.changed else 'Backend: No updates found - using existing deployment' }}"
+
+- name: Create .env file
+  template:
+    src: .env.j2
+    dest: "{{ useranalytics_backend_dest }}/.env"
+  register: env_file
+
+- name: Build useranalytics-backend image with podman
+  containers.podman.podman_image:
+    name: useranalytics-backend
+    tag: latest
+    path: "{{ useranalytics_backend_dest }}"
+    force: "{{ git_clone.changed }}"
+    build:
+      extra_args: "--platform=linux/arm64 --security-opt seccomp=unconfined"
+  register: image_build
+
+- name: Run useranalytics-backend container
+  containers.podman.podman_container:
+    name: useranalytics-backend
+    image: useranalytics-backend:latest
+    state: started
+    ports:
+      - "{{ useranalytics_backend_port }}:{{ useranalytics_backend_port }}"
+    env_file: "{{ useranalytics_backend_dest }}/.env"
+    recreate: "{{ git_clone.changed or env_file.changed or image_build.changed }}"
+    security_opt:
+      - seccomp=unconfined
