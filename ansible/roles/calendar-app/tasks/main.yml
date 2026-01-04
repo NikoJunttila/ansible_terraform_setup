@@ -1,0 +1,68 @@
+---
+- name: Load vault variables
+  include_vars: vault.yml
+  ignore_errors: yes
+
+- name: Ensure git is installed
+  apt:
+    name: git
+    state: present
+
+- name: Check for updates from GitHub (calendar-app)
+  git:
+    repo: "{{ calendar_app_repo }}"
+    dest: "{{ calendar_app_dest }}"
+    version: "{{ calendar_app_version }}"
+    force: yes
+    update: yes
+  register: git_clone
+
+- name: Display update status (calendar-app)
+  debug:
+    msg: "{{ 'CalendarApp: New commits found - will rebuild and redeploy' if git_clone.changed else 'CalendarApp: No updates found - using existing deployment' }}"
+
+- name: Ensure data directory exists
+  file:
+    path: "{{ calendar_app_data_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Import existing SQLite database
+  copy:
+    src: "{{ calendar_app_db_import_path }}"
+    dest: "{{ calendar_app_data_dir }}/app.db"
+    force: "{{ calendar_app_db_force_import }}"
+    mode: '0644'
+  when: calendar_app_db_import_path | length > 0
+  register: db_import
+
+- name: Create .env file
+  template:
+    src: .env.j2
+    dest: "{{ calendar_app_dest }}/.env"
+  register: env_file
+
+- name: Build calendar-app image
+  containers.podman.podman_image:
+    name: calendar-app
+    tag: latest
+    path: "{{ calendar_app_dest }}"
+    force: "{{ git_clone.changed }}"
+    build:
+      extra_args: "--platform=linux/arm64 --security-opt seccomp=unconfined"
+  register: image_build
+
+- name: Run calendar-app container
+  containers.podman.podman_container:
+    name: calendar
+    image: calendar-app:latest
+    state: started
+    restart_policy: unless-stopped
+    ports:
+      - "{{ calendar_app_port }}:{{ calendar_app_container_port }}"
+    volumes:
+      - "{{ calendar_app_data_dir }}:/app/data:Z"
+    env_file: "{{ calendar_app_dest }}/.env"
+    recreate: "{{ git_clone.changed or image_build.changed or (db_import.changed | default(false)) or env_file.changed }}"
+    security_opt:
+      - seccomp=unconfined

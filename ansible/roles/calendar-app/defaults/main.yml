@@ -1,0 +1,19 @@
+---
+calendar_app_repo: "https://github.com/NikoJunttila/Calendar-app.git"
+calendar_app_dest: "/opt/calendar-app"
+calendar_app_port: 5000
+calendar_app_container_port: 7331
+calendar_app_version: master
+
+calendar_app_data_dir: "{{ calendar_app_dest }}/data"
+calendar_app_db_import_path: ""
+calendar_app_db_force_import: false
+
+# Environment Configuration
+calendar_app_superkit_env: production
+# calendar_app_superkit_secret, calendar_app_mg_api_key, calendar_app_mg_email are in vars/vault.yml
+
+calendar_app_auth_redirect: "/profile"
+calendar_app_auth_session_expiry: 48
+calendar_app_auth_skip_verify: true
+calendar_app_auth_email_expiry: 11

@@ -16,9 +16,15 @@ caddy_sites:
   #   backend: "{{ backend_ip }}:8102"
   - domain: bookmarks.pi.junttila.dev  
     backend: "{{ backend_ip }}:8100"
-
+  #analytics backend
   - domain: backend.pi.junttila.dev
     backend: "{{ backend_ip }}:8000"
 
-  # - domain: pocket.pi.junttila.dev
-  #   backend: "{{ backend_ip }}:7101"
+  - domain: pocket.junttila.dev
+    backend: "{{ backend_ip }}:8090"
+
+  - domain: booking.pi.junttila.dev
+    backend: "{{ backend_ip }}:5000"
+
+  - domain: booking.junttila.dev
+    backend: "{{ backend_ip }}:5000"

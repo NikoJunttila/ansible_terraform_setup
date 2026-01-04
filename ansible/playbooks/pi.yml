@@ -15,3 +15,6 @@
     #- qbittorrent
     - useranalytics-backend
     - useranalytics-svelte
+    - role: calendar-app
+      vars:
+        calendar_app_db_import_path: "/home/derp/Documents/app.db"
