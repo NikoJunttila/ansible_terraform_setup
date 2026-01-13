@@ -1,0 +1,39 @@
+- name: Ensure monitoring podman network exists
+  containers.podman.podman_network:
+    name: monitoring
+    state: present
+
+- name: Create Prometheus directories
+  file:
+    path: "{{ prometheus_data_dir }}/{{ item }}"
+    state: directory
+    mode: "0755"
+    owner: "65534"
+    group: "65534"
+  loop:
+    - data
+    - config
+
+- name: Copy Prometheus config
+  copy:
+    src: prometheus.yml
+    dest: "{{ prometheus_data_dir }}/config/prometheus.yml"
+    mode: "0644"
+
+- name: Create and start Prometheus container
+  containers.podman.podman_container:
+    name: "{{ prometheus_container_name }}"
+    image: "{{ prometheus_image }}:{{ prometheus_version }}"
+    state: started
+    recreate: yes
+    network:
+      - monitoring
+    publish:
+      - "{{ prometheus_port }}:9090"   # optional, remove if you want internal-only
+    volume:
+      - "{{ prometheus_data_dir }}/config:/etc/prometheus:Z"
+      - "{{ prometheus_data_dir }}/data:/prometheus:Z"
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+    restart_policy: unless-stopped

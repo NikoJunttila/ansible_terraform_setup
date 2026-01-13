@@ -5,8 +5,6 @@ main goal of this project is to have a selfhosting server that can be accessed f
 for now the selfhosting server will be a raspberry pi 5 in my home network so i don't want to open ports on my router. and use tailscale to access it from anywhere.
 
 
-
-
 ## Raspberry Pi Local Setup
 
 Follow these steps to configure your Raspberry Pi 5 for this playbook.

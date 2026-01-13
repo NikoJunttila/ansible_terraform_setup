@@ -1,0 +1,7 @@
+prometheus_version: "latest"
+
+prometheus_port: 9090
+prometheus_container_name: prometheus
+prometheus_data_dir: /opt/prometheus
+
+prometheus_image: docker.io/prom/prometheus

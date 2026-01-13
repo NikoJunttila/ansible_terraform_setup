@@ -1,15 +1,10 @@
-selfhosting list:
+terraform is fked, need to apparently have s3 config state.
+Use remote state (Better for future)
+If you had set up remote state in S3, you could just configure the backend and pull the state. For next time, add this to your Terraform:
 
-pi-hole
-vaultwarden
-jellyfin
-https://github.com/go-shiori/shiori
-qbittorrent?
-
-
+for now run ./scripts/provision-vps.sh <actual public_ip>
 
 ports problems.
-
 Found the issue! Your security group only allows inbound traffic on ports 22 (SSH), 80 (HTTP), and 443 (HTTPS). Port 8443 is not open, which is why external access fails.
 
 You have two options:

@@ -1,0 +1,12 @@
+grafana_version: "latest"
+
+grafana_port: 3222
+grafana_timezone: "Europe/Helsinki"
+
+grafana_container_name: grafana
+grafana_data_dir: /opt/grafana
+
+grafana_admin_user: admin
+grafana_admin_password: admin
+
+grafana_image: docker.io/grafana/grafana

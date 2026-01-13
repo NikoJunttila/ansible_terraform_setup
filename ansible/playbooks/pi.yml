@@ -9,6 +9,8 @@
     - discordbot
     - tailscale
     - vaultwarden
+    - prometheus
+    - grafana
     #- pihole
     #- jellyfin
     - shiori

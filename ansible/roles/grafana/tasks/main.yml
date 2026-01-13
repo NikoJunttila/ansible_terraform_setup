@@ -1,0 +1,37 @@
+- name: Create Grafana directories
+  file:
+    path: "{{ grafana_data_dir }}/{{ item }}"
+    state: directory
+    mode: "0755"
+    owner: "472"
+    group: "472"
+  loop:
+    - data
+    - provisioning
+    - provisioning/datasources
+
+- name: Copy Prometheus datasource provisioning
+  copy:
+    src: prometheus-datasource.yml
+    dest: "{{ grafana_data_dir }}/provisioning/datasources/prometheus.yml"
+    mode: "0644"
+
+- name: Create and start Grafana container
+  containers.podman.podman_container:
+    name: "{{ grafana_container_name }}"
+    image: "{{ grafana_image }}:{{ grafana_version }}"
+    state: started
+    recreate: yes
+    network:
+      - monitoring
+    publish:
+      - "{{ grafana_port }}:3000"
+    env:
+      GF_SECURITY_ADMIN_USER: "{{ grafana_admin_user }}"
+      GF_SECURITY_ADMIN_PASSWORD: "{{ grafana_admin_password }}"
+      GF_PATHS_PROVISIONING: /etc/grafana/provisioning
+      TZ: "{{ grafana_timezone }}"
+    volume:
+      - "{{ grafana_data_dir }}/data:/var/lib/grafana:Z"
+      - "{{ grafana_data_dir }}/provisioning:/etc/grafana/provisioning:Z"
+    restart_policy: unless-stopped

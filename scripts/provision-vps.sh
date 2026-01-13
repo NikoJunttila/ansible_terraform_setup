@@ -6,17 +6,32 @@ set -e
 # Sites are configured in: ansible/group_vars/vps.yml
 # Backend IPs should be Tailscale IPs (100.x.x.x), not public IPs
 #
-# Usage:
-#   ./provision-vps.sh <tailscale_authkey>
-#   TAILSCALE_AUTHKEY=<key> ./provision-vps.sh
+#   ./provision-vps.sh <ip_address>
+#   ./provision-vps.sh <tailscale_authkey> [ip_address]
+#   TAILSCALE_AUTHKEY=<key> ./provision-vps.sh [ip_address]
 
-TAILSCALE_KEY="${1:-$TAILSCALE_AUTHKEY}"
+ARG1="$1"
+ARG2="$2"
+IP=""
+TAILSCALE_KEY="${TAILSCALE_AUTHKEY}"
+
+# Check if first argument is an IP address
+if [[ "$ARG1" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    IP="$ARG1"
+elif [ -n "$ARG1" ]; then
+    TAILSCALE_KEY="$ARG1"
+    # Check if second argument is an IP address
+    if [[ "$ARG2" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+        IP="$ARG2"
+    fi
+fi
 
 if [ -z "$TAILSCALE_KEY" ]; then
     echo "Error: Tailscale auth key is required."
     echo ""
-    echo "Usage: $0 <tailscale_authkey>"
-    echo "   or: TAILSCALE_AUTHKEY=<key> $0"
+    echo "Usage: $0 <tailscale_authkey> [ip]"
+    echo "   or: TAILSCALE_AUTHKEY=<key> $0 [ip]"
+    echo "   or: TAILSCALE_AUTHKEY=<key> $0 <ip>"
     echo ""
     echo "Get a key from: https://login.tailscale.com/admin/settings/keys"
     exit 1
@@ -29,8 +44,10 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 # Go to terraform-vps directory to get outputs
 cd "$PROJECT_ROOT/terraform-vps"
 
-# Get Public IP from Terraform
-IP=$(terraform output -raw vps_public_ip 2>/dev/null || echo "")
+# Get Public IP from Terraform if not provided
+if [ -z "$IP" ]; then
+    IP=$(terraform output -raw vps_public_ip 2>/dev/null || echo "")
+fi
 
 if [ -z "$IP" ]; then
     echo "Error: Could not get IP from Terraform. Is the VPS infrastructure up?"
