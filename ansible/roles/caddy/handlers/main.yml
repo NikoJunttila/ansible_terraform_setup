@@ -1,4 +1,4 @@
----
+## This handler will only run if some task does notify: Reload Caddy
 - name: Reload Caddy
   systemd:
     name: caddy
