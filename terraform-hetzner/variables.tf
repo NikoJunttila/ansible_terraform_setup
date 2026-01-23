@@ -13,13 +13,14 @@ variable "public_key_path" {
 variable "server_type" {
   description = "The type of the server"
   type        = string
-  default     = "cx22"
+  default     = "cx23"
+  # CX23 Intel ® / AMD 2vcpu 4 GB ram 40 GB memory 20 TB bandwith
 }
 
 variable "location" {
-  description = "The location of the server"
+  description = "The location of the server (helsinki)"
   type        = string
-  default     = "nbg1"
+  default     = "hel1"
 }
 
 variable "image" {

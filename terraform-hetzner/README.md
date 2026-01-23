@@ -83,5 +83,5 @@ Terraform is configured to read your public key from a file path.
 4.  **Connect**:
     Once deployed, get the IP from the output and connect:
     ```bash
-    ssh root@<server_ipv4>
+    ssh root@<server_ipv3>
     ```

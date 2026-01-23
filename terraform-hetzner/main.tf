@@ -12,6 +12,6 @@ resource "hcloud_server" "web" {
 
   public_net {
     ipv4_enabled = true
-    ipv6_enabled = true
+    # ipv6_enabled = true
   }
 }
