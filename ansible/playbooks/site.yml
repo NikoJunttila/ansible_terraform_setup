@@ -1,15 +1,4 @@
----
-- name: Configure ARM Lab Instance
-  hosts: all
-  gather_facts: yes
-  become: yes
-
-  roles:
-    - podman
-    - tailscale
-    - vaultwarden
-    - pihole
-    - jellyfin
-    - shiori
-    - qbittorrent
-    - useranalytics-svelte
+## run both playbooks
+##  ansible-playbook playbooks/site.yml
+- import_playbook: vps.yml
+- import_playbook: pi.yml

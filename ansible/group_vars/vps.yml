@@ -1,3 +1,4 @@
+# Only vps inventory label can access these variables as this is called vps.yml
 # Centralized backend IP (e.g., your Raspberry Pi Tailscale IP)
 backend_ip: "100.120.189.53"
 

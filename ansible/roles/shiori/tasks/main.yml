@@ -10,7 +10,7 @@
     name: shiori-app
     image: ghcr.io/go-shiori/shiori:{{ shiori_version }}
     state: started
-    recreate: yes
+    recreate: auto # default value
     publish:
       - "{{ shiori_port }}:8080"
     env:

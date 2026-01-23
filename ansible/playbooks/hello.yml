@@ -1,4 +1,3 @@
----
 - name: Hello World Ping
   hosts: all
   gather_facts: no

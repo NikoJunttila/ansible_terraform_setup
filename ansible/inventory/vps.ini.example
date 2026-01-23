@@ -1,6 +1,0 @@
-[vps]
-# Replace with your VPS public IP from terraform output
-your-vps-public-ip ansible_user=ubuntu
-
-[vps:vars]
-ansible_python_interpreter=/usr/bin/python3

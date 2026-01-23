@@ -1,0 +1,17 @@
+---
+#for testing setup I install on rasperry
+- name: Configure ARM Lab Instance
+  # hosts: all
+  hosts: vps
+  gather_facts: yes
+  become: yes
+
+  roles:
+    - podman
+    - tailscale
+    - vaultwarden
+    - pihole
+    - jellyfin
+    - shiori
+    - qbittorrent
+    - useranalytics-svelte

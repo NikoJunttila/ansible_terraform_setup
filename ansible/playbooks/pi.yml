@@ -1,22 +1,28 @@
----
-- name: Configure ARM Lab Instance
-  hosts: all
+#  ansible-playbook playbooks/pi.yml
+- name: Pi base setup
+  # hosts: all
+  hosts: pi
   gather_facts: yes
-  become: yes
-
+  become: yes #sudo mode
   roles:
-    - podman
-    - discordbot
-    - tailscale
-    - vaultwarden
-    - prometheus
-    - grafana
-    #- pihole
-    #- jellyfin
-    - shiori
-    #- qbittorrent
-    - useranalytics-backend
-    - useranalytics-svelte
+    - { role: podman, tags: podman }
+    - { role: discordbot, tags: discordbot }
+    - { role: tailscale, tags: tailscale }
+    - { role: vaultwarden, tags: vaultwarden }
+    # ansible-playbook playbooks/pi.yml --tags "grafana,prometheus"
+    - { role: prometheus, tags: prometheus }
+    - { role: grafana, tags: grafana }
+    # pihole was installed manually this time.
+    #- { role: pihole, tags: pihole }
+    # TODO figure out how to get jellyfin working on arm
+    # ansible-playbook playbooks/pi.yml --tags "jellyfin"
+    #- { role: jellyfin, tags: jellyfin }
+    - { role: shiori, tags: shiori }
+    #- { role: qbittorrent, tags: qbittorrent }
+    - { role: useranalytics-backend, tags: analytics }
+    - { role: useranalytics-svelte, tags: analytics }
+    # TODO replace calendar sqlite with tursodb
     - role: calendar-app
+      tags: calendar-app
       vars:
         calendar_app_db_import_path: "/home/derp/Documents/app.db"
