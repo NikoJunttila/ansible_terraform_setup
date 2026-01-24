@@ -1,7 +1,6 @@
 ---
 - name: Load vault variables
   include_vars: vault.yml
-  ignore_errors: yes
 
 - name: Ensure git is installed
   apt:
@@ -27,14 +26,14 @@
     state: directory
     mode: '0755'
 
-- name: Import existing SQLite database
-  copy:
-    src: "{{ calendar_app_db_import_path }}"
-    dest: "{{ calendar_app_data_dir }}/app.db"
-    force: "{{ calendar_app_db_force_import }}"
-    mode: '0644'
-  when: calendar_app_db_import_path | length > 0
-  register: db_import
+# - name: Import existing SQLite database
+#   copy:
+#     src: "{{ calendar_app_db_import_path }}"
+#     dest: "{{ calendar_app_data_dir }}/app.db"
+#     force: "{{ calendar_app_db_force_import }}"
+#     mode: '0644'
+#   when: calendar_app_db_import_path | length > 0
+#   register: db_import
 
 - name: Create .env file
   template:

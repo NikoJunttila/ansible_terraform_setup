@@ -21,8 +21,6 @@
     #- { role: qbittorrent, tags: qbittorrent }
     - { role: useranalytics-backend, tags: analytics }
     - { role: useranalytics-svelte, tags: analytics }
-    # TODO replace calendar sqlite with tursodb
+# ansible-playbook playbooks/pi.yml --tags "calendar-app" -K --vault-password-file ~/.ansible_vault_pass
     - role: calendar-app
       tags: calendar-app
-      vars:
-        calendar_app_db_import_path: "/home/derp/Documents/app.db"
