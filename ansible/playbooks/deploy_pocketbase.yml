@@ -1,6 +1,0 @@
----
-- name: Deploy PocketBase
-  hosts: vps
-  become: yes
-  roles:
-    - pocketbase

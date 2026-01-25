@@ -1,0 +1,8 @@
+---
+- name: Deploy PocketBase and Calendar App
+  hosts: vps
+  become: yes
+  roles:
+    - { role: podman, tags: podman }
+    - { role: pocketbase, tags: pocketbase }
+    - { role: calendar-app, tags: calendar-app }

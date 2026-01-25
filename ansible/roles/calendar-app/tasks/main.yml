@@ -32,6 +32,10 @@
     dest: "{{ calendar_app_dest }}/.env"
   register: env_file
 
+- name: Determine architecture
+  set_fact:
+    calendar_arch: "{{ 'linux/arm64' if ansible_facts['architecture'] == 'aarch64' else 'linux/amd64' }}"
+
 - name: Build calendar-app image
   containers.podman.podman_image:
     name: calendar-app
@@ -39,7 +43,7 @@
     path: "{{ calendar_app_dest }}"
     force: "{{ git_clone.changed }}"
     build:
-      extra_args: "--platform=linux/arm64 --security-opt seccomp=unconfined"
+      extra_args: "--platform={{ calendar_arch }} --security-opt seccomp=unconfined"
   register: image_build
 
 - name: Run calendar-app container

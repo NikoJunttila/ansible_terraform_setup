@@ -2,22 +2,23 @@
 
 {% for site in caddy_sites %}
 {{ site.domain }} {
-    reverse_proxy {{ site.backend }} {
+    {% set ups = site.backends if (site.backends is defined and (site.backends | length) > 0) else [site.backend] %}
+    reverse_proxy {{ ups | join(' ') }} {
         header_up X-Real-IP {remote_host}
         header_up X-Forwarded-For {remote_host}
         header_up X-Forwarded-Proto {scheme}
+
+        {% if site.lb_policy is defined and site.lb_policy %}
+        lb_policy {{ site.lb_policy }}
+        {% endif %}
+
+        {% if site.health_uri is defined and site.health_uri %}
+        health_uri {{ site.health_uri }}
+        {% if site.health_interval is defined and site.health_interval %}health_interval {{ site.health_interval }}{% endif %}
+        {% if site.health_timeout is defined and site.health_timeout %}health_timeout {{ site.health_timeout }}{% endif %}
+        {% endif %}
     }
 }
 
 {% endfor %}
 
-{# Legacy single-site support for backwards compatibility #}
-{% if caddy_sites | length == 0 and caddy_domain and caddy_backend_ip %}
-{{ caddy_domain }} {
-    reverse_proxy {{ caddy_backend_ip }}:{{ caddy_backend_port }} {
-        header_up X-Real-IP {remote_host}
-        header_up X-Forwarded-For {remote_host}
-        header_up X-Forwarded-Proto {scheme}
-    }
-}
-{% endif %}

@@ -1,6 +1,7 @@
 # Only vps inventory label can access these variables as this is called vps.yml
 # Centralized backend IP (e.g., your Raspberry Pi Tailscale IP)
 backend_ip: "100.120.189.53"
+backend_ip2: "100.120.189.54" # Placeholder for second backend
 
 # VPS Caddy Sites Configuration
 # 
@@ -23,13 +24,18 @@ caddy_sites:
     backend: "{{ backend_ip }}:8000"
 
   - domain: pocket.junttila.dev
-    backend: "{{ backend_ip }}:8090"
-
-  - domain: booking.pi.junttila.dev
-    backend: "{{ backend_ip }}:5000"
+    backends:
+      - "{{ backend_ip }}:8090"
+      - "{{ backend_ip2 }}:8090"
+    lb_policy: round_robin
+    health_uri: /api/health
 
   - domain: booking.junttila.dev
-    backend: "{{ backend_ip }}:5000"
+    backends:
+      - "{{ backend_ip }}:5000"
+      - "{{ backend_ip2 }}:5000"
+    lb_policy: round_robin
+    health_uri: /health
 
   - domain: grafana.junttila.dev
     backend: "{{ backend_ip }}:3222"
