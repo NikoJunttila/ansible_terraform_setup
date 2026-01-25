@@ -1,3 +1,4 @@
+# terraform cloud for saving state
 terraform {
   cloud {
     organization = "randomderp"
