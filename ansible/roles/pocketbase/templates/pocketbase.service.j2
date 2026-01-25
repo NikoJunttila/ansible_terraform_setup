@@ -1,0 +1,15 @@
+[Unit]
+Description=PocketBase service
+After=network.target
+
+[Service]
+Type=simple
+User={{ pocketbase_user }}
+Group={{ pocketbase_group }}
+WorkingDirectory={{ pocketbase_data_dir }}
+ExecStart={{ pocketbase_install_dir }}/pocketbase serve --http="0.0.0.0:{{ pocketbase_port }}" --dir="{{ pocketbase_data_dir }}/pb_data"
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

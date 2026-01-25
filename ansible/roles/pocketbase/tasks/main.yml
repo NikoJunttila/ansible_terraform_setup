@@ -1,0 +1,127 @@
+---
+- name: Ensure dependencies are installed
+  apt:
+    name:
+      - unzip
+      - rsync
+    state: present
+    update_cache: yes
+
+- name: Create pocketbase group
+  group:
+    name: "{{ pocketbase_group }}"
+    state: present
+
+- name: Create pocketbase user
+  user:
+    name: "{{ pocketbase_user }}"
+    group: "{{ pocketbase_group }}"
+    system: yes
+    shell: /sbin/nologin
+    create_home: no
+    state: present
+
+- name: Ensure pocketbase directories exist
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ pocketbase_user }}"
+    group: "{{ pocketbase_group }}"
+    mode: '0755'
+  loop:
+    - "{{ pocketbase_data_dir }}"
+    - "{{ pocketbase_install_dir }}"
+
+- name: Determine architecture
+  set_fact:
+    pb_arch: "{{ 'arm64' if ansible_facts['architecture'] == 'aarch64' else 'amd64' }}"
+
+- name: Check if PocketBase is installed
+  stat:
+    path: "{{ pocketbase_install_dir }}/pocketbase"
+  register: pb_binary
+
+- name: Download and install PocketBase
+  when: not pb_binary.stat.exists or (pb_binary.stat.exists and pocketbase_version not in pb_binary.stat.lnk_source | default(''))
+  block:
+    - name: Download PocketBase zip
+      get_url:
+        url: "https://github.com/pocketbase/pocketbase/releases/download/v{{ pocketbase_version }}/pocketbase_{{ pocketbase_version }}_linux_{{ pb_arch }}.zip"
+        dest: "/tmp/pocketbase.zip"
+
+    - name: Extract PocketBase
+      unarchive:
+        src: "/tmp/pocketbase.zip"
+        dest: "{{ pocketbase_install_dir }}"
+        remote_src: yes
+        group: "{{ pocketbase_group }}"
+        mode: '0755'
+  notify: Restart pocketbase
+
+- name: Check if remote data already exists
+  stat:
+    path: "{{ pocketbase_data_dir }}/pb_data/data.db"
+  register: remote_pb_data
+
+- name: Synchronize pb_data from backup
+  synchronize:
+    src: "{{ pocketbase_local_backup_path }}/pb_data"
+    dest: "{{ pocketbase_data_dir }}/"
+    recursive: yes
+    delete: no
+    rsync_path: "sudo rsync"
+    private_key: "{{ ansible_ssh_private_key_file }}"
+  delegate_to: localhost
+  become: no
+  when: 
+    - pocketbase_local_backup_path is defined
+    - pocketbase_perform_migration | bool or not remote_pb_data.stat.exists
+  notify: Restart pocketbase
+
+- name: Synchronize pb_migrations from backup
+  synchronize:
+    src: "{{ pocketbase_local_backup_path }}/pb_migrations"
+    dest: "{{ pocketbase_data_dir }}/"
+    recursive: yes
+    delete: no
+    rsync_path: "sudo rsync"
+    private_key: "{{ ansible_ssh_private_key_file }}"
+  delegate_to: localhost
+  become: no
+  when: 
+    - pocketbase_local_backup_path is defined
+    - pocketbase_perform_migration | bool or not remote_pb_data.stat.exists
+  notify: Restart pocketbase
+
+- name: Debug - List contents of data directory
+  shell: "ls -R {{ pocketbase_data_dir }}"
+  register: pb_dir_contents
+  changed_when: false
+
+- name: Show directory structure
+  debug:
+    var: pb_dir_contents.stdout_lines
+
+- name: Set permissions on data directory
+  file:
+    path: "{{ pocketbase_data_dir }}"
+    state: directory
+    owner: "{{ pocketbase_user }}"
+    group: "{{ pocketbase_group }}"
+    recurse: yes
+
+- name: Deploy PocketBase systemd service
+  template:
+    src: pocketbase.service.j2
+    dest: /etc/systemd/system/pocketbase.service
+    mode: '0644'
+  notify: 
+    - Reload systemd
+    - Restart pocketbase
+
+- name: Enable and start PocketBase service
+  systemd:
+    name: pocketbase
+    state: started
+    enabled: yes
+    daemon_reload: yes

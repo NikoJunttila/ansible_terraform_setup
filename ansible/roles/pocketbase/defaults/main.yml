@@ -1,0 +1,10 @@
+---
+pocketbase_version: "0.36.1"
+pocketbase_install_dir: "/usr/local/bin"
+pocketbase_data_dir: "/var/lib/pocketbase"
+pocketbase_user: "pocketbase"
+pocketbase_group: "pocketbase"
+pocketbase_port: 8090
+pocketbase_local_backup_path: "~/backups/pocketbase"
+pocketbase_perform_migration: false # Set to true only when you want to push local data to the server
+pocketbase_arch: "amd64" # Default, will override based on host facts if possible
