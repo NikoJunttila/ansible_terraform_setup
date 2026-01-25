@@ -12,8 +12,6 @@ caddy_sites:
   - domain: passwords.pi.junttila.dev
     backend: "{{ backend_ip }}:80"
   
-  - domain: analytics.pi.junttila.dev
-    backend: "{{ backend_ip }}:8102"
   - domain: analytics.junttila.dev  
     backend: "{{ backend_ip }}:8102"
 
