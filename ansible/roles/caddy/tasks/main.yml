@@ -37,6 +37,10 @@
     state: present
     update_cache: yes
 
+- name: Debug caddy_sites variable
+  debug:
+    var: caddy_sites
+
 - name: Configure Caddyfile
   template:
     src: Caddyfile.j2

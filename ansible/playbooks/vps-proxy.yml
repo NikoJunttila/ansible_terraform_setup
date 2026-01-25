@@ -1,15 +1,18 @@
 # Playbook for configuring a VPS as a reverse proxy
 # 
 # Usage:
-#   ansible-playbook playbooks/vps-proxy.yml -i inventory/vps.ini \
-#     -e "tailscale_authkey=tskey-xxx" \
-#     -e "caddy_domain=example.com" \
-#     -e "caddy_backend_ip=100.x.x.x"
+#   ansible-playbook -i inventory/inventory.ini playbooks/vps-proxy.yml --limit vps
 
 - name: Configure VPS as Reverse Proxy
-  hosts: all
+  hosts: vps
   gather_facts: yes
   become: yes
+
+  vars_prompt:
+    - name: tailscale_authkey
+      prompt: "Enter Tailscale Auth Key (leave blank to use TAILSCALE_AUTHKEY env var or skip)"
+      default: "{{ lookup('env', 'TAILSCALE_AUTHKEY') | default('', true) }}"
+      private: yes
 
   pre_tasks:
     - name: Update apt cache
@@ -52,21 +55,30 @@
     - caddy
 
   post_tasks:
-    - name: Display Tailscale IP
+    - name: Get Tailscale IP
       command: tailscale ip -4
       register: tailscale_ip
       changed_when: false
+      failed_when: false
 
-    - name: Show next steps
+    - name: Show status summary
       debug:
         msg: |
+          ================================================
           VPS Configuration Complete!
+          ================================================
           
+          {% if tailscale_ip.rc == 0 %}
           Tailscale IP: {{ tailscale_ip.stdout }}
-          Domain: {{ caddy_domain | default('Not configured') }}
-          Backend: {{ caddy_backend_ip | default('Not configured') }}:{{ caddy_backend_port | default(80) }}
+          {% else %}
+          Tailscale: NOT AUTHENTICATED
+          {% endif %}
           
           Next steps:
-          1. Point your domain's DNS A record to the VPS public IP
-          2. Verify Caddy got SSL certificates: sudo systemctl status caddy
-          3. Test the connection: curl https://{{ caddy_domain | default('yourdomain.com') }}
+          1. Point your domain's DNS A record to: {{ ansible_host }}
+          2. Wait for DNS propagation
+          3. Test your sites:
+          {% for site in caddy_sites %}
+             curl -I https://{{ site.domain }}
+          {% endfor %}
+          ================================================
