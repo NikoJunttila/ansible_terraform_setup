@@ -10,7 +10,7 @@ backend_ip2: "127.0.0.1" # Localhost for services running on this VPS
 
 caddy_sites:
   - domain: passwords.pi.junttila.dev
-    backend: "{{ backend_ip }}:80"
+    backend: "{{ backend_ip }}:3005"
   
   - domain: analytics.junttila.dev  
     backend: "{{ backend_ip }}:8102"

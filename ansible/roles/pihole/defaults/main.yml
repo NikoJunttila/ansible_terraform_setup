@@ -10,4 +10,7 @@ pihole_dns2: "1.0.0.1"
 pihole_timezone: "Europe/Helsinki"
 
 # Web interface port (8081 to avoid conflict with Vaultwarden on 80)
-pihole_web_port: 8081
+pihole_web_port: 8001
+
+# Local IP of the Pi (optional, but helpful for FTL)
+pihole_ipv4: "192.168.178.32"

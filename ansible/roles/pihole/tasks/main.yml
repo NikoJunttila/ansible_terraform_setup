@@ -1,18 +1,61 @@
 ---
-- name: Stop systemd-resolved (conflicts with port 53)
-  systemd:
-    name: systemd-resolved
-    state: stopped
-    enabled: no
+- name: Check if DNS resolution is working
+  command: getent hosts google.com
+  register: dns_check
   ignore_errors: yes
+  changed_when: false
 
-- name: Set DNS to external resolver
+- name: Apply temporary DNS fix if resolution is broken
+  copy:
+    content: "nameserver 1.1.1.1\n"
+    dest: /etc/resolv.conf
+  when: dns_check.rc != 0
+  become: yes
+
+- name: Ensure systemd-resolved is installed
+  apt:
+    name: systemd-resolved
+    state: present
+    update_cache: yes
+  become: yes
+
+- name: Ensure /etc/systemd/resolved.conf.d directory exists
+  file:
+    path: /etc/systemd/resolved.conf.d
+    state: directory
+    mode: '0755'
+
+- name: Configure systemd-resolved upstream DNS and disable stub listener
   copy:
     content: |
-      nameserver 1.1.1.1
-      nameserver 1.0.0.1
+      [Resolve]
+      DNS={{ pihole_dns1 }} {{ pihole_dns2 }}
+      DNSStubListener=no
+    dest: /etc/systemd/resolved.conf.d/pihole.conf
+  register: resolved_config
+
+- name: Force restart systemd-resolved to apply changes
+  systemd:
+    name: systemd-resolved
+    state: restarted
+    enabled: yes
+
+- name: Wait for systemd-resolved to generate resolv.conf
+  wait_for:
+    path: /run/systemd/resolve/resolv.conf
+    state: present
+    timeout: 30
+
+- name: Ensure /etc/resolv.conf is a symlink to systemd-resolved managed file
+  file:
+    src: /run/systemd/resolve/resolv.conf
     dest: /etc/resolv.conf
-    mode: '0644'
+    state: link
+    force: yes
+  become: yes
+
+- name: Flush handlers to ensure everything is applied
+  meta: flush_handlers
 
 - name: Create and start Pi-hole container
   containers.podman.podman_container:
@@ -21,14 +64,28 @@
     state: started
     recreate: yes
     restart_policy: always
-    ports:
-      - "53:53/tcp"
-      - "53:53/udp"
-      - "{{ pihole_web_port }}:80/tcp"
+    network_mode: host
+    cap_add:
+      - NET_ADMIN
     env:
       TZ: "{{ pihole_timezone }}"
+      pihole_password: "{{ pihole_password }}"
+      FTLCONF_dns_upstreams: "{{ pihole_dns1 }};{{ pihole_dns2 }}"
+      FTLCONF_webserver_port: "{{ pihole_web_port }}"
+      FTLCONF_webserver_password: "{{ pihole_password }}"
+      FTLCONF_dns_listeningMode: "BIND"
+      FTLCONF_dns_interface: "eth0"
+      FTLCONF_dns_bindAddress: "{{ pihole_ipv4 }}"
+      # Legacy support if someone uses an older image
       WEBPASSWORD: "{{ pihole_password }}"
       PIHOLE_DNS_: "{{ pihole_dns1 }};{{ pihole_dns2 }}"
+      WEB_PORT: "{{ pihole_web_port }}"
     volumes:
       - pihole-data:/etc/pihole
       - pihole-dnsmasq:/etc/dnsmasq.d
+
+- name: Explicitly set Pi-hole admin password (v6 style)
+  shell: |
+    printf "{{ pihole_password }}\n{{ pihole_password }}\n" | podman exec -i pihole pihole setpassword
+  changed_when: false
+  become: yes
