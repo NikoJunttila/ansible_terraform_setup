@@ -1,0 +1,7 @@
+---
+translations_helper_repo: "https://github.com/NikoJunttila/translations-helper.git"
+translations_helper_dest: "/opt/translations-helper"
+PORT: 4444
+GO_ENV: production
+DATABASE_URL: libsql://translations-nikojunttila.aws-eu-west-1.turso.io
+# DATABASE_AUTH_TOKEN and OPENAI_API_KEY are defined in vault.yml

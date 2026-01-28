@@ -1,0 +1,52 @@
+---
+- name: Load vault variables
+  include_vars: vault.yml
+
+- name: Ensure git is installed
+  apt:
+    name: git
+    state: present
+
+- name: Check for updates from GitHub (translations-helper)
+  git:
+    repo: "{{ translations_helper_repo }}"
+    dest: "{{ translations_helper_dest }}"
+    force: yes
+    update: yes
+  register: git_clone
+
+- name: Display update status (translations-helper)
+  debug:
+    msg: "{{ 'TranslationsHelper: New commits found - will rebuild and redeploy' if git_clone.changed else 'TranslationsHelper: No updates found - using existing deployment' }}"
+
+- name: Determine architecture
+  set_fact:
+    translations_helper_arch: "{{ 'linux/arm64' if ansible_facts['architecture'] == 'aarch64' else 'linux/amd64' }}"
+
+- name: Build translations-helper image
+  containers.podman.podman_image:
+    name: translations-helper
+    tag: latest
+    path: "{{ translations_helper_dest }}"
+    force: "{{ git_clone.changed }}"
+    build:
+      extra_args: "--platform={{ translations_helper_arch }} --security-opt seccomp=unconfined"
+  register: image_build
+
+- name: Run translations-helper container
+  containers.podman.podman_container:
+    name: translations-helper
+    image: translations-helper:latest
+    state: started
+    restart_policy: unless-stopped
+    ports:
+      - "{{ PORT }}:{{ PORT }}"
+    recreate: "{{ git_clone.changed or image_build.changed }}"
+    env:
+      PORT: "{{ PORT }}"
+      GO_ENV: "{{ GO_ENV }}"
+      DATABASE_URL: "{{ DATABASE_URL }}"
+      DATABASE_AUTH_TOKEN: "{{ vault_database_auth_token }}"
+      OPENAI_API_KEY: "{{ vault_openai_api_key }}"
+    security_opt:
+      - seccomp=unconfined

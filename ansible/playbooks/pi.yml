@@ -22,6 +22,7 @@
     #- { role: qbittorrent, tags: qbittorrent }
     - { role: useranalytics-backend, tags: analytics }
     - { role: useranalytics-svelte, tags: analytics }
+    - { role: translations, tags: translations }
 # ansible-playbook playbooks/pi.yml --tags "calendar-app" -K --vault-password-file ~/.ansible_vault_pass
     - role: calendar-app
       tags: calendar-app
