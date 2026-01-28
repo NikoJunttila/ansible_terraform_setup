@@ -1,0 +1,4 @@
+---
+- name: Include grafana.grafana.loki role
+  include_role:
+    name: grafana.grafana.loki

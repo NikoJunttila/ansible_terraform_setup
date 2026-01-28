@@ -16,6 +16,12 @@
     dest: "{{ grafana_data_dir }}/provisioning/datasources/prometheus.yml"
     mode: "0644"
 
+- name: Copy Loki datasource provisioning
+  copy:
+    src: loki-datasource.yml
+    dest: "{{ grafana_data_dir }}/provisioning/datasources/loki.yml"
+    mode: "0644"
+
 - name: Create and start Grafana container
   containers.podman.podman_container:
     name: "{{ grafana_container_name }}"
@@ -34,4 +40,7 @@
     volume:
       - "{{ grafana_data_dir }}/data:/var/lib/grafana:Z"
       - "{{ grafana_data_dir }}/provisioning:/etc/grafana/provisioning:Z"
+      - "{{ grafana_data_dir }}/provisioning:/etc/grafana/provisioning:Z"
+    etc_hosts:
+      host.containers.internal: "host-gateway"
     restart_policy: unless-stopped

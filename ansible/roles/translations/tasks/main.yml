@@ -41,9 +41,14 @@
     restart_policy: unless-stopped
     ports:
       - "{{ PORT }}:{{ PORT }}"
+      - "{{ METRICS_PORT }}:{{ METRICS_PORT }}"
     recreate: "{{ git_clone.changed or image_build.changed }}"
+    log_driver: journald
+    log_opt:
+      tag: "{{ '{{.Name}}' }}"
     env:
       PORT: "{{ PORT }}"
+      METRICS_PORT: "{{ METRICS_PORT }}"
       GO_ENV: "{{ GO_ENV }}"
       DATABASE_URL: "{{ DATABASE_URL }}"
       DATABASE_AUTH_TOKEN: "{{ vault_database_auth_token }}"

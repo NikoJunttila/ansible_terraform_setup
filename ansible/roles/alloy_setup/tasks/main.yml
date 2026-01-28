@@ -1,0 +1,23 @@
+---
+- name: Create alloy group
+  group:
+    name: alloy
+    state: present
+    system: yes
+
+- name: Create alloy user with systemd-journal group
+  user:
+    name: alloy
+    group: alloy
+    groups: systemd-journal
+    append: yes
+    system: yes
+    create_home: no
+    shell: /sbin/nologin
+
+- name: Include grafana.grafana.alloy role
+
+  include_role:
+    name: grafana.grafana.alloy
+  vars:
+    alloy_config: "{{ alloy_setup_config }}"

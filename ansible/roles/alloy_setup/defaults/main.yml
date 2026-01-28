@@ -1,0 +1,36 @@
+---
+alloy_setup_config: |
+  logging {
+    level = "info"
+  }
+
+  loki.write "local" {
+    endpoint {
+      url = "http://localhost:3100/loki/api/v1/push"
+    }
+  }
+
+  loki.source.journal "journal" {
+    max_age = "24h"
+    relabel_rules = loki.relabel.journal.rules
+    forward_to = [loki.relabel.journal.receiver]
+  }
+
+  loki.relabel "journal" {
+    rule {
+      source_labels = ["__journal__systemd_unit"]
+      target_label  = "unit"
+    }
+    rule {
+      source_labels = ["__journal_container_name"]
+      target_label  = "container_name"
+    }
+    // Filter for translations-helper container
+    rule {
+      source_labels = ["container_name"]
+      regex         = "translations-helper"
+      action        = "keep"
+    }
+    forward_to = [loki.write.local.receiver]
+  }
+

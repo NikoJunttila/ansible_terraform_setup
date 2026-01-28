@@ -10,9 +10,6 @@
     - { role: discordbot, tags: discordbot }
     - { role: tailscale, tags: tailscale }
     - { role: vaultwarden, tags: vaultwarden }
-    # ansible-playbook playbooks/pi.yml --tags "grafana,prometheus"
-    - { role: prometheus, tags: prometheus }
-    - { role: grafana, tags: grafana }
     # pihole was installed manually this time.
 
     # TODO figure out how to get jellyfin working on arm
@@ -23,6 +20,11 @@
     - { role: useranalytics-backend, tags: analytics }
     - { role: useranalytics-svelte, tags: analytics }
     - { role: translations, tags: translations }
+    # ansible-playbook playbooks/pi.yml --tags "monitoring,grafana"
+    - { role: grafana, tags: grafana }
+    - { role: prometheus, tags: monitoring }
+    - { role: loki_setup, tags: monitoring }
+    - { role: alloy_setup, tags: monitoring }
 # ansible-playbook playbooks/pi.yml --tags "calendar-app" -K --vault-password-file ~/.ansible_vault_pass
     - role: calendar-app
       tags: calendar-app
