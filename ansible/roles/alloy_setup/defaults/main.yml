@@ -58,10 +58,46 @@ alloy_setup_config: |
       target_label = "instance"
       replacement  = "raspberrypi-5"
     }
+
+    rule {
+      target_label = "job"
+      replacement  = "node_exporter"
+    }
+
+    rule {
+      target_label = "collector"
+      replacement  = "alloy"
+    }
   }
 
   // Wire exporter -> Prometheus
   prometheus.scrape "host" {
     targets    = prometheus.exporter.unix.host.targets
     forward_to = [prometheus.relabel.host.receiver]
+  }
+
+  // Relabel translations metrics
+  prometheus.relabel "translations" {
+    forward_to = [prometheus.remote_write.local.receiver]
+
+    rule {
+      target_label = "job"
+      replacement  = "translations"
+    }
+
+    rule {
+      target_label = "instance"
+      replacement  = "{{ ansible_hostname }}"
+    }
+    
+    rule {
+      target_label = "collector"
+      replacement  = "alloy"
+    }
+  }
+
+  // Scrape translations-helper
+  prometheus.scrape "translations" {
+    targets    = [{"__address__" = "localhost:4445"}]
+    forward_to = [prometheus.relabel.translations.receiver]
   }
