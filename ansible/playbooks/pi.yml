@@ -24,7 +24,7 @@
     - { role: grafana, tags: grafana }
     - { role: prometheus, tags: monitoring }
     - { role: loki_setup, tags: monitoring }
-    - { role: alloy_setup, tags: monitoring }
+    - { role: alloy_setup, tags: ["monitoring", "alloy"] }
 # ansible-playbook playbooks/pi.yml --tags "calendar-app" -K --vault-password-file ~/.ansible_vault_pass
     - role: calendar-app
       tags: calendar-app

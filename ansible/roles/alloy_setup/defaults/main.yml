@@ -1,4 +1,6 @@
 ---
+alloy_setup_env_vars:
+  CUSTOM_ARGS: "--server.http.listen-addr=0.0.0.0:12345"
 alloy_setup_config: |
   logging {
     level = "info"

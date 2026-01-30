@@ -15,9 +15,15 @@
     create_home: no
     shell: /sbin/nologin
 
+- name: Ensure python3-netaddr is installed
+  apt:
+    name: python3-netaddr
+    state: present
+
 - name: Include grafana.grafana.alloy role
 
   include_role:
     name: grafana.grafana.alloy
   vars:
     alloy_config: "{{ alloy_setup_config }}"
+    alloy_env_file_vars: "{{ alloy_setup_env_vars }}"
