@@ -25,6 +25,7 @@
     - { role: prometheus, tags: monitoring }
     - { role: loki_setup, tags: monitoring }
     - { role: alloy_setup, tags: ["monitoring", "alloy"] }
+    # - { role: node_exporter, tags: ["monitoring", "node_exporter"] } //not needed with current alloy config. alloy can scrape the data itself and send to prometheus.
 # ansible-playbook playbooks/pi.yml --tags "calendar-app" -K --vault-password-file ~/.ansible_vault_pass
     - role: calendar-app
       tags: calendar-app

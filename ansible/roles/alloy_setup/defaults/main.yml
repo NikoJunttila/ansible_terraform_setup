@@ -35,4 +35,33 @@ alloy_setup_config: |
     }
     forward_to = [loki.write.local.receiver]
   }
+  
+  ////////////////////
+  // PROMETHEUS METRICS (NEW)
+  ////////////////////
+  
+  // Collect Linux host metrics
+  prometheus.exporter.unix "host" {}
+  
+  // Remote-write to Prometheus
+  prometheus.remote_write "local" {
+    endpoint {
+      url = "http://localhost:9090/api/v1/write"
+    }
+  }
+  
+  // Relabel host metrics
+  prometheus.relabel "host" {
+    forward_to = [prometheus.remote_write.local.receiver]
 
+    rule {
+      target_label = "instance"
+      replacement  = "raspberrypi-5"
+    }
+  }
+
+  // Wire exporter -> Prometheus
+  prometheus.scrape "host" {
+    targets    = prometheus.exporter.unix.host.targets
+    forward_to = [prometheus.relabel.host.receiver]
+  }
