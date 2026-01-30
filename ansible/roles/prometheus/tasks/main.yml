@@ -26,10 +26,7 @@
     image: "{{ prometheus_image }}:{{ prometheus_version }}"
     state: started
     recreate: yes
-    network:
-      - monitoring
-    publish:
-      - "{{ prometheus_port }}:9090"   # optional, remove if you want internal-only
+    network: host
     volume:
       - "{{ prometheus_data_dir }}/config:/etc/prometheus:Z"
       - "{{ prometheus_data_dir }}/data:/prometheus:Z"
