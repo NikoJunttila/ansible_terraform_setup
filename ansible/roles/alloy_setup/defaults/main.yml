@@ -61,7 +61,7 @@ alloy_setup_config: |
 
     rule {
       target_label = "job"
-      replacement  = "node_exporter"
+      replacement  = "node"
     }
 
     rule {
