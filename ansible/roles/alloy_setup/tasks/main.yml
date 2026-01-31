@@ -5,11 +5,11 @@
     state: present
     system: yes
 
-- name: Create alloy user with systemd-journal group
+- name: Create alloy user with required groups
   user:
     name: alloy
     group: alloy
-    groups: systemd-journal
+    groups: systemd-journal,adm
     append: yes
     system: yes
     create_home: no
