@@ -1,0 +1,37 @@
+---
+- name: Backup services from Raspberry Pi
+  hosts: pi
+  gather_facts: no
+  tasks:
+    - name: Ensure local backup directories exist
+      delegate_to: localhost
+      file:
+        path: "{{ playbook_dir }}/../backups/{{ item }}"
+        state: directory
+        mode: '0755'
+      loop:
+        - vaultwarden
+        - memos
+
+    - name: Pull Vaultwarden data from Pi
+      synchronize:
+        src: /opt/vaultwarden/data/
+        dest: "{{ playbook_dir }}/../backups/vaultwarden/"
+        mode: pull
+        archive: yes
+        rsync_opts:
+          - "--exclude=*.log"
+          - "--exclude=*.sqlite3-journal"
+          - "--exclude=*.sqlite3-shm"
+          - "--exclude=*.sqlite3-wal"
+
+    - name: Pull Memos data from Pi
+      synchronize:
+        src: /opt/memos/
+        dest: "{{ playbook_dir }}/../backups/memos/"
+        mode: pull
+        archive: yes
+        rsync_opts:
+          - "--exclude=*.log"
+          - "--exclude=*-shm"
+          - "--exclude=*-wal"
