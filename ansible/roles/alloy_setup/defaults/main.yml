@@ -101,3 +101,30 @@ alloy_setup_config: |
     targets    = [{"__address__" = "localhost:4445"}]
     forward_to = [prometheus.relabel.translations.receiver]
   }
+
+  // Relabel Caddy metrics
+  prometheus.relabel "caddy" {
+    forward_to = [prometheus.remote_write.local.receiver]
+
+    rule {
+      target_label = "job"
+      replacement  = "caddy"
+    }
+
+    rule {
+      target_label = "instance"
+      replacement  = "vps-hetzner"
+    }
+    
+    rule {
+      target_label = "collector"
+      replacement  = "alloy"
+    }
+  }
+
+  // Scrape Caddy metrics from VPS via Tailscale
+  prometheus.scrape "caddy" {
+    targets    = [{"__address__" = "{{ VPS_TAILSCALE_IP }}:2019", "__metrics_path__" = "/metrics"}]
+    forward_to = [prometheus.relabel.caddy.receiver]
+  }
+
