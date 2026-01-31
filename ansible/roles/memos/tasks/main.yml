@@ -1,0 +1,20 @@
+---
+- name: Create Memos data directory
+  file:
+    path: /opt/memos
+    state: directory
+    mode: '0755'
+
+- name: Create and start Memos container
+  containers.podman.podman_container:
+    name: memos
+    image: docker.io/neosmemo/memos:{{ memos_version }}
+    state: started
+    recreate: yes
+    publish:
+      - "{{ memos_port }}:5230"
+    env:
+      TZ: "{{ memos_timezone }}"
+    volume:
+      - /opt/memos:/var/opt/memos
+    restart_policy: unless-stopped

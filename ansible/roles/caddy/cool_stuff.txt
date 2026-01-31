@@ -1,0 +1,17 @@
+Try Files
+Fallback file serving (great for SPAs):
+try_files {path} /index.html
+
+
+log {
+    output file /var/log/caddy/access.log
+    format json
+}
+
+Plugins
+Caddy has a huge ecosystem of plugins via xcaddy for things like:
+
+Database authentication
+Different DNS providers for DNS-01 challenges
+Additional protocols (SSH, WebDAV, etc.)
+Custom modules

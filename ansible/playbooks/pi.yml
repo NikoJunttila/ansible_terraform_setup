@@ -16,6 +16,7 @@
     # ansible-playbook playbooks/pi.yml --tags "jellyfin"
     #- { role: jellyfin, tags: jellyfin }
     - { role: shiori, tags: shiori }
+    - { role: memos, tags: memos }
     #- { role: qbittorrent, tags: qbittorrent }
     - { role: useranalytics-backend, tags: analytics }
     - { role: useranalytics-svelte, tags: analytics }

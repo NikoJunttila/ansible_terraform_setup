@@ -3,3 +3,11 @@
   systemd:
     name: caddy
     state: reloaded
+  failed_when: false
+  register: caddy_reload
+
+- name: Restart Caddy if reload failed
+  systemd:
+    name: caddy
+    state: restarted
+  when: caddy_reload.failed

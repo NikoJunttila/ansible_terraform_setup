@@ -1,0 +1,9 @@
+---
+# Memos version
+memos_version: "stable"
+
+# Port for Memos web interface
+memos_port: 5230
+
+# Timezone
+memos_timezone: "Europe/Helsinki"

@@ -1,12 +1,16 @@
 # Managed by Ansible - do not edit manually
+# Tailscale IP so we can connect to this from raspberry
+{
+    admin 100.95.105.15:2019
+    servers
+    metrics
+}
 
 {% for site in caddy_sites %}
 {{ site.domain }} {
     {% set ups = site.backends if (site.backends is defined and (site.backends | length) > 0) else [site.backend] %}
     reverse_proxy {{ ups | join(' ') }} {
         header_up X-Real-IP {remote_host}
-        header_up X-Forwarded-For {remote_host}
-        header_up X-Forwarded-Proto {scheme}
 
         {% if site.lb_policy is defined and site.lb_policy %}
         lb_policy {{ site.lb_policy }}
@@ -21,4 +25,3 @@
 }
 
 {% endfor %}
-

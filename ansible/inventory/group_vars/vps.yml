@@ -2,6 +2,7 @@
 # Centralized backend IP (e.g., your Raspberry Pi Tailscale IP)
 backend_ip: "100.100.6.24"
 backend_ip2: "127.0.0.1" # Localhost for services running on this VPS
+VPS_TAILSCALE_IP: "100.95.105.15"
 
 # VPS Caddy Sites Configuration
 # 
@@ -45,3 +46,6 @@ caddy_sites:
 
   - domain: alloy.junttila.dev
     backend: "{{ backend_ip }}:12345"
+
+  - domain: memos.junttila.dev
+    backend: "{{ backend_ip }}:5230"
