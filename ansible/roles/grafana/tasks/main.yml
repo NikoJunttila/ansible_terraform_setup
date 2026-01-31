@@ -9,6 +9,8 @@
     - data
     - provisioning
     - provisioning/datasources
+    - provisioning/dashboards
+    - dashboards
 
 - name: Copy Prometheus datasource provisioning
   copy:
@@ -20,6 +22,18 @@
   copy:
     src: loki-datasource.yml
     dest: "{{ grafana_data_dir }}/provisioning/datasources/loki.yml"
+    mode: "0644"
+
+- name: Copy dashboard provider configuration
+  copy:
+    src: dashboard-provider.yml
+    dest: "{{ grafana_data_dir }}/provisioning/dashboards/provider.yml"
+    mode: "0644"
+
+- name: Copy dashboard files
+  copy:
+    src: "dashboards/"
+    dest: "{{ grafana_data_dir }}/dashboards/"
     mode: "0644"
 
 - name: Create and start Grafana container
@@ -38,7 +52,7 @@
     volume:
       - "{{ grafana_data_dir }}/data:/var/lib/grafana:Z"
       - "{{ grafana_data_dir }}/provisioning:/etc/grafana/provisioning:Z"
-      - "{{ grafana_data_dir }}/provisioning:/etc/grafana/provisioning:Z"
+      - "{{ grafana_data_dir }}/dashboards:/var/lib/grafana/dashboards:Z"
     etc_hosts:
       host.containers.internal: "host-gateway"
     restart_policy: unless-stopped
