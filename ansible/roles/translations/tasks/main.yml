@@ -53,5 +53,6 @@
       DATABASE_URL: "{{ DATABASE_URL }}"
       DATABASE_AUTH_TOKEN: "{{ vault_database_auth_token }}"
       OPENAI_API_KEY: "{{ vault_openai_api_key }}"
+      OTLP_ENDPOINT: "{{ OTLP_ENDPOINT }}"
     security_opt:
       - seccomp=unconfined

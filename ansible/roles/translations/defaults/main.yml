@@ -5,4 +5,5 @@ PORT: 4444
 METRICS_PORT: 4445
 GO_ENV: production
 DATABASE_URL: libsql://translations-nikojunttila.aws-eu-west-1.turso.io
+OTLP_ENDPOINT: localhost:4317
 # DATABASE_AUTH_TOKEN and OPENAI_API_KEY are defined in vault.yml
