@@ -1,0 +1,9 @@
+---
+tempo_version: "2.4.1"
+tempo_container_name: tempo
+tempo_data_dir: /opt/tempo
+tempo_image: docker.io/grafana/tempo
+
+tempo_port_http: 3200
+tempo_port_otlp_grpc: 4017
+tempo_port_otlp_http: 4018

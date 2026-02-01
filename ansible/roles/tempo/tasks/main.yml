@@ -1,0 +1,36 @@
+---
+- name: Create Tempo directories
+  file:
+    path: "{{ tempo_data_dir }}/{{ item }}"
+    state: directory
+    mode: "0755"
+    owner: "10001"
+    group: "10001"
+  loop:
+    - config
+    - data
+    - wal
+    - blocks
+
+- name: Template Tempo configuration
+  template:
+    src: tempo.yaml.j2
+    dest: "{{ tempo_data_dir }}/config/tempo.yaml"
+    mode: "0644"
+    owner: "10001"
+    group: "10001"
+
+- name: Create and start Tempo container
+  containers.podman.podman_container:
+    name: "{{ tempo_container_name }}"
+    image: "{{ tempo_image }}:{{ tempo_version }}"
+    state: started
+    recreate: yes
+    network: host
+    volume:
+      - "{{ tempo_data_dir }}/config:/etc/tempo:Z"
+      - "{{ tempo_data_dir }}/wal:/var/tempo/wal:Z"
+      - "{{ tempo_data_dir }}/blocks:/var/tempo/blocks:Z"
+    command:
+      - "-config.file=/etc/tempo/tempo.yaml"
+    restart_policy: unless-stopped

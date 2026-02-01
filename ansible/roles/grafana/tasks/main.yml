@@ -18,6 +18,12 @@
     dest: "{{ grafana_data_dir }}/provisioning/datasources/prometheus.yml"
     mode: "0644"
 
+- name: Copy tempo datasource provisioning
+  copy:
+    src: tempo-datasource.yml
+    dest: "{{ grafana_data_dir }}/provisioning/datasources/tempo.yml"
+    mode: "0644"
+
 - name: Copy Loki datasource provisioning
   copy:
     src: loki-datasource.yml

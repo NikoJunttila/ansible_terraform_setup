@@ -1,0 +1,33 @@
+server:
+  http_listen_port: {{ tempo_port_http }}
+
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:{{ tempo_port_otlp_grpc }}
+        http:
+          endpoint: 0.0.0.0:{{ tempo_port_otlp_http }}
+
+ingester:
+  max_block_duration: 5m
+  lifecycler:
+    ring:
+      replication_factor: 1
+      kvstore:
+        store: inmemory
+
+storage:
+  trace:
+    backend: local
+    wal:
+      path: /var/tempo/wal
+    local:
+      path: /var/tempo/blocks
+    block:
+      bloom_filter_false_positive: .05
+
+compactor:
+  compaction:
+    compacted_block_retention: 1h
