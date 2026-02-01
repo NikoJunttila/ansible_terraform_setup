@@ -15,28 +15,31 @@ alloy_setup_config: |
     }
   }
 
-  loki.source.journal "systemd" {
-    forward_to = [loki.process.filter_logs.receiver]
-
-    labels = {
-      job = "systemd-journal",
-      host = "raspberrypi",
+  loki.relabel "journal" {
+    forward_to = []
+  
+    rule {
+      source_labels = ["__journal__systemd_unit"]
+      target_label  = "systemd_unit"
+    }
+    // Keep only logs from specific containers (multiple containers with OR pattern)
+    // find the container_name with this; journalctl CONTAINER_NAME=calendar
+    rule {
+      source_labels = ["__journal_container_name"]
+      regex = "(translations-helper|tpx-bot|calendar)"
+      action = "keep"
+    }
+    // Optional: Add container name as a label for easier querying in Loki
+    rule {
+      source_labels = ["__journal_container_name"]
+      target_label = "container"
     }
   }
 
-  loki.process "filter_logs" {
-    stage.labels {
-      values = {
-        unit = "__journal__systemd_unit",
-      }
-    }
-
-    stage.drop {
-      expression = ".*Connection closed by authenticating user root"
-      drop_counter_reason = "noisy"
-    }
-
+  loki.source.journal "systemd" {
     forward_to = [loki.write.grafana_loki.receiver]
+    relabel_rules = loki.relabel.journal.rules
+    max_age = "24h"
   }
 
   
