@@ -54,5 +54,7 @@
       DATABASE_AUTH_TOKEN: "{{ vault_database_auth_token }}"
       OPENAI_API_KEY: "{{ vault_openai_api_key }}"
       OTLP_ENDPOINT: "{{ OTLP_ENDPOINT }}"
+    etc_hosts:
+      host.containers.internal: "host-gateway"
     security_opt:
       - seccomp=unconfined

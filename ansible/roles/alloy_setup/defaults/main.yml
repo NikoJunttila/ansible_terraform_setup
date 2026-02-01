@@ -135,3 +135,34 @@ alloy_setup_config: |
     forward_to = [prometheus.relabel.caddy.receiver]
   }
 
+  ////////////////////
+  // TRACING (NEW)
+  ////////////////////
+
+  otelcol.receiver.otlp "default" {
+    grpc {
+      endpoint = "0.0.0.0:4317"
+    }
+    http {
+      endpoint = "0.0.0.0:4318"
+    }
+    output {
+      traces  = [otelcol.processor.batch.default.input]
+    }
+  }
+
+  otelcol.processor.batch "default" {
+    output {
+      traces  = [otelcol.exporter.otlp.tempo.input]
+    }
+  }
+
+  otelcol.exporter.otlp "tempo" {
+    client {
+      endpoint = "localhost:4017"
+      tls {
+        insecure = true
+      }
+    }
+  }
+
