@@ -1,0 +1,6 @@
+---
+# Shiori version
+withoutbg_version: "latest"
+
+# Helper for local access (Podman routes 8080->8080)
+withoutbg_port: 4477

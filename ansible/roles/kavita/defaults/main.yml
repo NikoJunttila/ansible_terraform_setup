@@ -1,0 +1,20 @@
+---
+kavita_version: "latest"
+kavita_image: "jvmilazz0/kavita"
+
+# Container networking
+kavita_port: 5421
+
+# Timezone
+kavita_timezone: "Europe/Helsinki"
+
+# Host paths for volumes
+kavita_base_dir: "/opt/kavita"
+kavita_config_dir: "{{ kavita_base_dir }}/config"
+kavita_manga_dir: "{{ kavita_base_dir }}/manga"
+kavita_comics_dir: "{{ kavita_base_dir }}/comics"
+kavita_books_dir: "{{ kavita_base_dir }}/books"
+
+# Container state
+kavita_container_state: started
+kavita_container_restart_policy: unless-stopped

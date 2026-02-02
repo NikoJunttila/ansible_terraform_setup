@@ -10,17 +10,19 @@
     - { role: discordbot, tags: discordbot }
     - { role: tailscale, tags: tailscale }
     - { role: vaultwarden, tags: vaultwarden }
-    # pihole was installed manually this time.
 
     # TODO figure out how to get jellyfin working on arm
     # ansible-playbook playbooks/pi.yml --tags "jellyfin"
     #- { role: jellyfin, tags: jellyfin }
     - { role: shiori, tags: shiori }
+    - { role: withoutbg, tags: withoutbg }
     - { role: memos, tags: memos }
+    - { role: kavita, tags: kavita }
     #- { role: qbittorrent, tags: qbittorrent }
     - { role: useranalytics-backend, tags: analytics }
     - { role: useranalytics-svelte, tags: analytics }
     - { role: translations, tags: translations }
+
     # ansible-playbook playbooks/pi.yml --tags "monitoring,grafana"
     - { role: grafana, tags: grafana }
     - { role: prometheus, tags: monitoring }

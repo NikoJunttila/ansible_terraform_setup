@@ -24,6 +24,12 @@ caddy_sites:
   - domain: backend.pi.junttila.dev
     backend: "{{ backend_ip }}:8000"
 
+  - domain: books.pi.junttila.dev
+    backend: "{{ backend_ip }}:5421"
+
+  - domain: bg.junttila.dev
+    backend: "{{ backend_ip }}:4477"
+
   - domain: pocket.junttila.dev
     backends:
       #- "{{ backend_ip }}:8090" #has only a sqlite database and assets are stored in server so loadbalancing will not work

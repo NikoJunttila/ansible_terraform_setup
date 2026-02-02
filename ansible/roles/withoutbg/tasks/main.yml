@@ -1,0 +1,17 @@
+---
+- name: Create WithoutBG data directory
+  file:
+    path: /opt/withoutbg
+    state: directory
+    mode: '0755'
+
+- name: Create and start WithoutBG container
+  containers.podman.podman_container:
+    name: withoutbg-app
+    image: docker.io/withoutbg/app:{{ withoutbg_version }}
+    state: started
+    recreate: yes
+    publish:
+      - "{{ withoutbg_port }}:80"
+    volume:
+      - withoutbg-data:/opt/withoutbg

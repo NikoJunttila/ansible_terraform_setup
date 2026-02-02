@@ -1,0 +1,30 @@
+---
+- name: Ensure Kavita directories exist
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+    # Optional: owner/group if needed, but Podman usually handles this or runs rootless
+  loop:
+    - "{{ kavita_base_dir }}"
+    - "{{ kavita_config_dir }}"
+    - "{{ kavita_manga_dir }}"
+    - "{{ kavita_comics_dir }}"
+    - "{{ kavita_books_dir }}"
+
+- name: Create and start Kavita container
+  containers.podman.podman_container:
+    name: kavita
+    image: "docker.io/{{ kavita_image }}:{{ kavita_version }}"
+    state: "{{ kavita_container_state }}"
+    recreate: yes
+    restart_policy: "{{ kavita_container_restart_policy }}"
+    publish:
+      - "{{ kavita_port }}:5000"
+    volume:
+      - "{{ kavita_config_dir }}:/kavita/config"
+      - "{{ kavita_manga_dir }}:/assets/manga"
+      - "{{ kavita_comics_dir }}:/assets/comics"
+      - "{{ kavita_books_dir }}:/assets/books"
+    env:
+      TZ: "{{ kavita_timezone }}"
