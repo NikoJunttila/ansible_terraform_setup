@@ -24,7 +24,7 @@ caddy_sites:
   - domain: backend.pi.junttila.dev
     backend: "{{ backend_ip }}:8000"
 
-  - domain: books.pi.junttila.dev
+  - domain: books.junttila.dev
     backend: "{{ backend_ip }}:5421"
 
   - domain: bg.junttila.dev

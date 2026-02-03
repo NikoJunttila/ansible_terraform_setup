@@ -13,7 +13,7 @@
 
     # TODO figure out how to get jellyfin working on arm
     # ansible-playbook playbooks/pi.yml --tags "jellyfin"
-    #- { role: jellyfin, tags: jellyfin }
+    - { role: jellyfin, tags: jellyfin }
     - { role: shiori, tags: shiori }
     - { role: withoutbg, tags: withoutbg }
     - { role: memos, tags: memos }
