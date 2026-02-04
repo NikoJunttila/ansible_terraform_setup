@@ -1,0 +1,33 @@
+---
+- name: Pull CouchDB image
+  containers.podman.podman_image:
+    name: "{{ couchdb_image }}"
+
+- name: Create CouchDB container (managed by systemd)
+  containers.podman.podman_container:
+    name: "{{ couchdb_container_name }}"
+    image: "{{ couchdb_image }}"
+    state: created  # Ensure it exists but let systemd start it
+    restart_policy: unless-stopped
+    ports:
+      - "{{ couchdb_port_host }}:{{ couchdb_port_container }}"
+    env:
+      COUCHDB_USER: "{{ couchdb_user }}"
+      COUCHDB_PASSWORD: "{{ couchdb_password }}"
+    volumes:
+      - "{{ couchdb_data_dir }}:/opt/couchdb/data:Z"
+      - "{{ couchdb_config_dir }}:/opt/couchdb/etc/local.d:Z"
+    healthcheck: "curl --fail --silent --user '{{ couchdb_user }}:{{ couchdb_password }}' http://localhost:5984/_up || exit 1"
+    generate_systemd:
+      path: /etc/systemd/system/
+      restart_policy: always
+      time: 120
+      names: true
+
+- name: Enable systemd service for CouchDB
+  systemd:
+    name: "container-{{ couchdb_container_name }}"
+    enabled: true
+    state: started
+    daemon_reload: true
+  become: true

@@ -1,0 +1,11 @@
+---
+couchdb_image: "docker.io/library/couchdb:latest"
+couchdb_container_name: "obsidian-livesync"
+couchdb_port_host: 5984
+couchdb_port_container: 5984
+
+# Defaults, should be overridden in group_vars or inventory
+couchdb_user: "admin"
+couchdb_database_name: "obsidiandb"
+couchdb_data_dir: "/srv/containers/couchdb-livesync/data"
+couchdb_config_dir: "/srv/containers/couchdb-livesync/config"

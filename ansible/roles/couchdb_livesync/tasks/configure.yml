@@ -1,0 +1,63 @@
+---
+- name: Wait for CouchDB to be up
+  uri:
+    url: "http://localhost:{{ couchdb_port_container }}/_up"
+    user: "{{ couchdb_user }}"
+    password: "{{ couchdb_password }}"
+    force_basic_auth: yes
+    status_code: 200
+  register: result
+  until: result.status == 200
+  retries: 10
+  delay: 5
+
+- name: Enable single-node cluster
+  uri:
+    url: "http://localhost:{{ couchdb_port_container }}/_cluster_setup"
+    method: POST
+    user: "{{ couchdb_user }}"
+    password: "{{ couchdb_password }}"
+    force_basic_auth: yes
+    body_format: json
+    body:
+      action: "enable_single_node"
+      bind_address: "0.0.0.0"
+      username: "{{ couchdb_user }}"
+      password: "{{ couchdb_password }}"
+      port: "{{ couchdb_port_container }}"
+      singlenode: true
+    status_code: [200, 201]
+  ignore_errors: true # Ignore if already configured, though better to check first. Safe to run generally.
+
+- name: Create database
+  uri:
+    url: "http://localhost:{{ couchdb_port_container }}/{{ couchdb_database_name }}"
+    method: PUT
+    user: "{{ couchdb_user }}"
+    password: "{{ couchdb_password }}"
+    force_basic_auth: yes
+    status_code: [201, 412]
+  changed_when: result.status == 201
+  register: result
+
+- name: Configure CouchDB settings
+  uri:
+    url: "http://localhost:{{ couchdb_port_container }}/_node/_local/_config/{{ item.section }}/{{ item.key }}"
+    method: PUT
+    user: "{{ couchdb_user }}"
+    password: "{{ couchdb_password }}"
+    force_basic_auth: yes
+    body_format: json
+    body: "\"{{ item.value }}\""
+    status_code: 200
+  loop:
+    - { section: 'chttpd', key: 'require_valid_user', value: 'true' }
+    - { section: 'chttpd_auth', key: 'require_valid_user', value: 'true' }
+    - { section: 'httpd', key: 'WWW-Authenticate', value: 'Basic realm=\"couchdb\"' }
+    - { section: 'httpd', key: 'enable_cors', value: 'true' }
+    - { section: 'chttpd', key: 'enable_cors', value: 'true' }
+    - { section: 'chttpd', key: 'max_http_request_size', value: '4294967296' }
+    - { section: 'couchdb', key: 'max_document_size', value: '50000000' }
+    - { section: 'cors', key: 'credentials', value: 'true' }
+    - { section: 'cors', key: 'origins', value: 'app://obsidian.md, capacitor://localhost, http://localhost' }
+  notify: Restart CouchDB container

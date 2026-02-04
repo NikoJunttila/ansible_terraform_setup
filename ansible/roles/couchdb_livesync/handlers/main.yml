@@ -1,0 +1,6 @@
+---
+- name: Restart CouchDB container
+  containers.podman.podman_container:
+    name: "{{ couchdb_container_name }}"
+    state: started
+    restart: true

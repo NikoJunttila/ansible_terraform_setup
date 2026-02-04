@@ -1,0 +1,6 @@
+---
+- name: Setup Obsidian LiveSync (CouchDB)
+  hosts: pi  # Change this to your target host group
+  become: true
+  roles:
+    - couchdb_livesync

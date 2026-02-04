@@ -1,0 +1,12 @@
+---
+- name: Load vault variables
+  ansible.builtin.include_vars: vault.yml
+
+- name: Setup prerequisites
+  ansible.builtin.include_tasks: prerequisites.yml
+
+- name: Manage CouchDB container
+  ansible.builtin.include_tasks: container.yml
+
+- name: Configure CouchDB
+  ansible.builtin.include_tasks: configure.yml
