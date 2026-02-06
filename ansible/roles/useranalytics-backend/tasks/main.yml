@@ -47,3 +47,4 @@
     recreate: "{{ git_clone.changed or env_file.changed or image_build.changed }}"
     security_opt:
       - seccomp=unconfined
+    restart_policy: always
