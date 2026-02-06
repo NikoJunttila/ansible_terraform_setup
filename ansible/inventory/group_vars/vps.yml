@@ -58,3 +58,6 @@ caddy_sites:
 
   - domain: memos.junttila.dev
     backend: "{{ backend_ip }}:5230"
+
+  - domain: jellyfin.junttila.dev
+    backend: "{{ backend_ip }}:8096"
