@@ -1,0 +1,32 @@
+---
+- name: Stop and disable CouchDB service
+  systemd:
+    name: "container-{{ couchdb_container_name }}"
+    state: stopped
+    enabled: false
+  become: true
+
+- name: Remove CouchDB container
+  containers.podman.podman_container:
+    name: "{{ couchdb_container_name }}"
+    state: absent
+
+- name: Remove CouchDB data
+  file:
+    path: "{{ couchdb_data_dir }}"
+    state: absent
+  become: true
+  # Verify we aren't blowing up something critical by accident. 
+  # This relies on couchdb_data_dir being set correctly.
+
+- name: Recreate CouchDB data directory
+  file:
+    path: "{{ couchdb_data_dir }}"
+    state: directory
+    owner: "{{ ansible_facts['user_id'] }}"
+    group: "{{ ansible_facts['user_id'] }}"
+    mode: '0755'
+  become: true
+
+# Option explicit restart isn't needed if we run the main role afterwards, 
+# as it will ensure the container is started.

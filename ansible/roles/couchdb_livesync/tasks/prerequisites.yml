@@ -17,3 +17,4 @@
   loop:
     - "{{ couchdb_data_dir }}"
     - "{{ couchdb_config_dir }}"
+  become: true

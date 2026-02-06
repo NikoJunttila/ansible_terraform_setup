@@ -1,0 +1,22 @@
+---
+- name: Reset CouchDB LiveSync Database
+  hosts: pi
+  gather_facts: true
+  vars_files:
+    - ../roles/couchdb_livesync/vars/vault.yml
+    
+  tasks:
+    - name: Confirm reset
+      pause:
+        prompt: "WARNING: This will delete all data in the CouchDB container. Press Enter to continue or Ctrl+C to abort."
+
+    - name: Include couchdb_livesync defaults
+      include_vars:
+        file: ../roles/couchdb_livesync/defaults/main.yml
+
+    - name: Reset CouchDB
+      include_tasks: ../roles/couchdb_livesync/tasks/reset.yml
+
+    - name: Re-provision CouchDB
+      include_role:
+        name: couchdb_livesync

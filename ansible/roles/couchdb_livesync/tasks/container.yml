@@ -23,6 +23,7 @@
       restart_policy: always
       time: 120
       names: true
+  become: true
 
 - name: Enable systemd service for CouchDB
   systemd:
