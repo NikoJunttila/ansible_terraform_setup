@@ -10,14 +10,13 @@
     - { role: discordbot, tags: discordbot }
     - { role: tailscale, tags: tailscale }
     - { role: vaultwarden, tags: vaultwarden }
-
-    # TODO figure out how to get jellyfin working on arm
-    # ansible-playbook playbooks/pi.yml --tags "jellyfin"
+    
     - { role: jellyfin, tags: jellyfin }
-    - { role: shiori, tags: shiori }
+    #- { role: shiori, tags: shiori }
     - { role: withoutbg, tags: withoutbg }
     - { role: memos, tags: memos }
     - { role: kavita, tags: kavita }
+    - { role: ocis, tags: ocis }
     #- { role: qbittorrent, tags: qbittorrent }
     - { role: useranalytics-backend, tags: analytics }
     - { role: useranalytics-svelte, tags: analytics }

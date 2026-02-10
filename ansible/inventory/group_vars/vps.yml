@@ -61,3 +61,6 @@ caddy_sites:
 
   - domain: jellyfin.junttila.dev
     backend: "{{ backend_ip }}:8096"
+  
+  - domain: ocis.junttila.dev
+    backend: "{{ backend_ip }}:9200"

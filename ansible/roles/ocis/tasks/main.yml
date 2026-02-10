@@ -1,0 +1,50 @@
+---
+- name: Create oCIS directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+    owner: '1000'
+    group: '1000'
+  loop:
+    - "{{ ocis_config_dir }}"
+    - "{{ ocis_data_dir }}"
+
+- name: Check if oCIS config already exists
+  stat:
+    path: "{{ ocis_config_dir }}/ocis.yaml"
+  register: ocis_config
+
+- name: Initialize oCIS config (first run only)
+  command: >
+    podman run --rm
+    -v {{ ocis_config_dir }}:/etc/ocis
+    -v {{ ocis_data_dir }}:/var/lib/ocis
+    docker.io/owncloud/ocis:{{ ocis_version }}
+    init --insecure yes
+  register: ocis_init_output
+  when: not ocis_config.stat.exists
+
+- name: Show oCIS init output (contains admin password)
+  debug:
+    var: ocis_init_output.stdout_lines
+  when: ocis_init_output is changed
+
+- name: Create and start oCIS container
+  containers.podman.podman_container:
+    name: ocis
+    image: "docker.io/owncloud/ocis:{{ ocis_version }}"
+    state: started
+    recreate: yes
+    restart_policy: unless-stopped
+    publish:
+      - "{{ ocis_port }}:9200"
+    volume:
+      - "{{ ocis_config_dir }}:/etc/ocis"
+      - "{{ ocis_data_dir }}:/var/lib/ocis"
+    env:
+      TZ: "{{ ocis_timezone }}"
+      OCIS_URL: "{{ ocis_url }}"
+      OCIS_INSECURE: "{{ ocis_insecure }}"
+      PROXY_HTTP_ADDR: "0.0.0.0:9200"
+      PROXY_TLS: "false"

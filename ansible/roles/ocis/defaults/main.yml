@@ -1,0 +1,17 @@
+---
+ocis_version: "latest"
+ocis_port: 9200
+
+# Host directories
+ocis_base_dir: "/opt/ocis"
+ocis_config_dir: "{{ ocis_base_dir }}/config"
+ocis_data_dir: "{{ ocis_base_dir }}/data"
+
+# oCIS URL – set this to the public domain behind your reverse proxy
+ocis_url: "https://ocis.junttila.dev"
+
+# Set to "true" when running behind a TLS-terminating reverse proxy (e.g. Caddy)
+ocis_insecure: "true"
+
+# Timezone
+ocis_timezone: "Europe/Helsinki"
