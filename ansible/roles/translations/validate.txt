@@ -1,0 +1,19 @@
+https://docs.podman.io/en/stable/markdown/podman-auto-update.1.html
+
+systemctl list-timers | grep podman
+
+podman ps
+podman inspect myapp --format '{{.State.Health.Status}}'
+
+manually trigger update.
+podman auto-update
+
+🔒 1. Use versioned tags
+
+Instead of:
+
+myapp:latest
+
+Prefer:
+
+myapp:1

@@ -1,0 +1,39 @@
+- name: Install Podman
+  apt:
+    name: podman
+    state: present
+
+- name: Deploy quadlet container file
+  copy:
+    dest: /etc/containers/systemd/myapp.container
+    content: |
+      [Unit]
+      Description=My App Container
+      After=network-online.target
+
+      [Container]
+      Image=ghcr.io/yourorg/myapp:latest
+      AutoUpdate=registry
+      PublishPort=8080:8080
+
+      HealthCmd=curl -f http://localhost:8080/health || exit 1
+      HealthInterval=30s
+      HealthTimeout=5s
+      HealthRetries=3
+      HealthStartPeriod=10s
+
+      [Install]
+      WantedBy=multi-user.target
+  notify: Reload systemd
+
+- name: Enable myapp service
+  systemd:
+    name: myapp.service
+    enabled: yes
+    state: started
+
+- name: Enable podman auto update timer
+  systemd:
+    name: podman-auto-update.timer
+    enabled: yes
+    state: started
