@@ -1,0 +1,29 @@
+[Unit]
+Description=Translations Helper Service
+After=network-online.target
+
+[Container]
+Image={{ APP_IMAGE }}
+AutoUpdate=registry
+PublishPort={{ PORT }}:{{ PORT }}
+PublishPort={{ METRICS_PORT }}:{{ METRICS_PORT }}
+Environment=PORT={{ PORT }}
+Environment=METRICS_PORT={{ METRICS_PORT }}
+Environment=GO_ENV={{ GO_ENV }}
+Environment=DATABASE_URL={{ DATABASE_URL }}
+Environment=DATABASE_AUTH_TOKEN={{ vault_database_auth_token }}
+Environment=OPENAI_API_KEY={{ vault_openai_api_key }}
+Environment=OTLP_ENDPOINT={{ OTLP_ENDPOINT }}
+AddHost=host.containers.internal:host-gateway
+SecurityLabelDisable=true
+PodmanArgs=--security-opt=seccomp=unconfined
+LogDriver=journald
+LogOpt=tag={{ '{{.Name}}' }}
+HealthCmd=wget -qO- http://127.0.0.1:{{ PORT }}/health || exit 1
+HealthInterval=30s
+HealthTimeout=5s
+HealthRetries=3
+HealthStartPeriod=30s
+
+[Install]
+WantedBy=multi-user.target

@@ -11,9 +11,7 @@ podman auto-update
 🔒 1. Use versioned tags
 
 Instead of:
-
 myapp:latest
 
 Prefer:
-
 myapp:1

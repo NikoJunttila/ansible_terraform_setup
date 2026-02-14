@@ -2,59 +2,44 @@
 - name: Load vault variables
   include_vars: vault.yml
 
-- name: Ensure git is installed
+- name: Ensure Podman is installed
   apt:
-    name: git
+    name: podman
     state: present
 
-- name: Check for updates from GitHub (translations-helper)
-  git:
-    repo: "{{ translations_helper_repo }}"
-    dest: "{{ translations_helper_dest }}"
-    force: yes
-    update: yes
-  register: git_clone
+- name: Create auto-update override directory
+  file:
+    path: /etc/systemd/system/podman-auto-update.timer.d
+    state: directory
+    mode: '0755'
 
-- name: Display update status (translations-helper)
-  debug:
-    msg: "{{ 'TranslationsHelper: New commits found - will rebuild and redeploy' if git_clone.changed else 'TranslationsHelper: No updates found - using existing deployment' }}"
+- name: Configure auto-update schedule
+  copy:
+    dest: /etc/systemd/system/podman-auto-update.timer.d/override.conf
+    content: |
+      [Timer]
+      OnCalendar=daily
+      Persistent=true
+  notify: Reload systemd
 
-- name: Determine architecture
-  set_fact:
-    translations_helper_arch: "{{ 'linux/arm64' if ansible_facts['architecture'] == 'aarch64' else 'linux/amd64' }}"
-
-- name: Build translations-helper image
-  containers.podman.podman_image:
-    name: translations-helper
-    tag: latest
-    path: "{{ translations_helper_dest }}"
-    force: "{{ git_clone.changed }}"
-    build:
-      extra_args: "--platform={{ translations_helper_arch }} --security-opt seccomp=unconfined"
-  register: image_build
-
-- name: Run translations-helper container
-  containers.podman.podman_container:
-    name: translations-helper
-    image: translations-helper:latest
+- name: Enable auto-update timer
+  systemd:
+    name: podman-auto-update.timer
+    enabled: true
     state: started
-    restart_policy: unless-stopped
-    ports:
-      - "{{ PORT }}:{{ PORT }}"
-      - "{{ METRICS_PORT }}:{{ METRICS_PORT }}"
-    recreate: "{{ git_clone.changed or image_build.changed }}"
-    log_driver: journald
-    log_opt:
-      tag: "{{ '{{.Name}}' }}"
-    env:
-      PORT: "{{ PORT }}"
-      METRICS_PORT: "{{ METRICS_PORT }}"
-      GO_ENV: "{{ GO_ENV }}"
-      DATABASE_URL: "{{ DATABASE_URL }}"
-      DATABASE_AUTH_TOKEN: "{{ vault_database_auth_token }}"
-      OPENAI_API_KEY: "{{ vault_openai_api_key }}"
-      OTLP_ENDPOINT: "{{ OTLP_ENDPOINT }}"
-    etc_hosts:
-      host.containers.internal: "host-gateway"
-    security_opt:
-      - seccomp=unconfined
+
+- name: Deploy Quadlet container file
+  template:
+    src: translations.container.j2
+    dest: /etc/containers/systemd/translations-helper.container
+    mode: '0644'
+  notify: Reload systemd
+
+- name: Flush handlers to ensure systemd is reloaded before starting service
+  meta: flush_handlers
+
+- name: Enable and start translations-helper service
+  systemd:
+    name: translations-helper.service
+    enabled: true
+    state: started

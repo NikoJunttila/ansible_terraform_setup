@@ -6,5 +6,5 @@ METRICS_PORT: 4445
 GO_ENV: production
 DATABASE_URL: libsql://translations-nikojunttila.aws-eu-west-1.turso.io
 OTLP_ENDPOINT: host.containers.internal:4317
-# CONTAINER_URL:  ghcr.io/nikojunttila/translations-helper:latest
+APP_IMAGE:  ghcr.io/nikojunttila/translations-helper:latest
 # DATABASE_AUTH_TOKEN and OPENAI_API_KEY are defined in vault.yml

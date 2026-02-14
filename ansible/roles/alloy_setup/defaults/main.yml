@@ -26,7 +26,7 @@ alloy_setup_config: |
     // find the container_name with this; journalctl CONTAINER_NAME=calendar
     rule {
       source_labels = ["__journal_container_name"]
-      regex = "(translations-helper|tpx-bot|calendar)"
+      regex = "(systemd-translations-helper|tpx-bot|calendar)"
       action = "keep"
     }
     // Optional: Add container name as a label for easier querying in Loki
