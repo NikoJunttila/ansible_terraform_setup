@@ -11,6 +11,10 @@ No changes are applied
 Shows tasks that would run
 Some modules can’t fully simulate (Ansible will warn you)
 
+## ansible vault
+
+ansible-vault view roles/autokuma/vars/vault.yml --ask-vault-pass
+
 ## Lint your playbook (best practice)
 
 If you install ansible-lint:

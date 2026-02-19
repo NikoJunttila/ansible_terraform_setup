@@ -1,0 +1,31 @@
+# Managed by Ansible - do not edit manually
+[Unit]
+Description=AutoKuma - Uptime Kuma Monitor Manager
+After=network.target uptime-kuma.service
+Wants=uptime-kuma.service
+
+[Service]
+Restart=always
+RestartSec=10
+TimeoutStartSec=300
+ExecStartPre=-/usr/bin/podman rm -f autokuma
+ExecStartPre=-/usr/bin/podman pull {{ autokuma_image }}
+ExecStart=/usr/bin/podman run --name autokuma --rm \
+  --network host \
+  -v {{ autokuma_static_monitors_dir }}:/app/monitors:ro \
+  -v {{ autokuma_data_dir }}/autokuma.toml:/app/autokuma.toml:ro \
+  -v /run/podman/podman.sock:/var/run/docker.sock:ro \
+  -e AUTOKUMA__KUMA__URL=http://127.0.0.1:{{ uptime_kuma_port }} \
+{% if uptime_kuma_username is defined and uptime_kuma_username %}
+  -e AUTOKUMA__KUMA__USERNAME={{ uptime_kuma_username }} \
+{% endif %}
+{% if uptime_kuma_password is defined and uptime_kuma_password %}
+  -e AUTOKUMA__KUMA__PASSWORD={{ uptime_kuma_password }} \
+{% endif %}
+  -e AUTOKUMA__STATIC_MONITORS=/app/monitors \
+  -e AUTOKUMA__DOCKER__HOSTS=unix:///var/run/docker.sock \
+  {{ autokuma_image }}
+ExecStop=/usr/bin/podman stop autokuma
+
+[Install]
+WantedBy=multi-user.target

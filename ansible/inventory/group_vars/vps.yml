@@ -1,7 +1,7 @@
 # Only vps inventory label can access these variables as this is called vps.yml
 # Centralized backend IP (e.g., your Raspberry Pi Tailscale IP)
 backend_ip: "100.100.6.24"
-backend_ip2: "127.0.0.1" # Localhost for services running on this VPS
+localhost: "127.0.0.1" # Localhost for services running on this VPS
 VPS_TAILSCALE_IP: "100.95.105.15"
 
 # VPS Caddy Sites Configuration
@@ -36,14 +36,14 @@ caddy_sites:
   - domain: pocket.junttila.dev
     backends:
       #- "{{ backend_ip }}:8090" #has only a sqlite database and assets are stored in server so loadbalancing will not work
-      - "{{ backend_ip2 }}:8090"
+      - "{{ localhost }}:8090"
     lb_policy: round_robin
     health_uri: /api/health
 
   - domain: booking.junttila.dev
     backends:
       - "{{ backend_ip }}:5000"
-      - "{{ backend_ip2 }}:5000"
+      - "{{ localhost }}:5000"
     lb_policy: round_robin
     health_uri: /health
 
@@ -64,3 +64,6 @@ caddy_sites:
   
   - domain: ocis.junttila.dev
     backend: "{{ backend_ip }}:9200"
+
+  - domain: status.junttila.dev
+    backend: "{{ localhost }}:3001"

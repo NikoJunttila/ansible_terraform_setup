@@ -53,6 +53,9 @@
   roles:
     - tailscale
     - caddy
+    - podman
+    - { role: uptime_kuma, tags: uptime_kuma }
+    - { role: autokuma, tags: autokuma }
 
   post_tasks:
     - name: Get Tailscale IP

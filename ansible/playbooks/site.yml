@@ -1,4 +1,0 @@
-## run both playbooks
-##  ansible-playbook playbooks/site.yml
-- import_playbook: vps.yml
-- import_playbook: pi.yml

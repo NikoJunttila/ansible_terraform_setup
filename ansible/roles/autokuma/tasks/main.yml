@@ -1,0 +1,51 @@
+---
+- name: Load vault variables
+  include_vars:
+    file: vault.yml
+
+- name: Create AutoKuma directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - "{{ autokuma_data_dir }}"
+    - "{{ autokuma_static_monitors_dir }}"
+
+- name: Deploy static monitor definitions
+  copy:
+    src: "{{ item }}"
+    dest: "{{ autokuma_static_monitors_dir }}/"
+    mode: '0644'
+  with_fileglob:
+    - "monitors/*.json"
+  notify: Restart AutoKuma
+
+- name: Enable Podman socket for container discovery
+  systemd:
+    name: podman.socket
+    state: started
+    enabled: yes
+
+- name: Create AutoKuma configuration
+  template:
+    src: autokuma.toml.j2
+    dest: "{{ autokuma_data_dir }}/autokuma.toml"
+    mode: '0644'
+  notify: Restart AutoKuma
+
+- name: Create AutoKuma systemd service
+  template:
+    src: autokuma.service.j2
+    dest: /etc/systemd/system/autokuma.service
+    mode: '0644'
+  notify:
+    - Reload systemd
+    - Restart AutoKuma
+
+- name: Enable and start AutoKuma service
+  systemd:
+    name: autokuma
+    state: started
+    enabled: yes
+    daemon_reload: yes

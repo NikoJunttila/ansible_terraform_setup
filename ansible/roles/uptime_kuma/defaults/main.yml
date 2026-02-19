@@ -1,0 +1,4 @@
+---
+uptime_kuma_port: 3001
+uptime_kuma_image: "docker.io/louislam/uptime-kuma:2"
+uptime_kuma_data_dir: "/opt/uptime-kuma/data"

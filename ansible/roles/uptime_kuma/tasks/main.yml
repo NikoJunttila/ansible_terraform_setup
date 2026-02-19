@@ -1,0 +1,41 @@
+---
+# --- Uptime Kuma ---
+
+- name: Create Uptime Kuma data directory
+  file:
+    path: "{{ uptime_kuma_data_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Create Uptime Kuma systemd service
+  copy:
+    dest: /etc/systemd/system/uptime-kuma.service
+    content: |
+      [Unit]
+      Description=Uptime Kuma Monitoring
+      After=network.target
+
+      [Service]
+      Restart=always
+      TimeoutStartSec=300
+      ExecStartPre=-/usr/bin/podman rm -f uptime-kuma
+      ExecStartPre=-/usr/bin/podman pull {{ uptime_kuma_image }}
+      ExecStart=/usr/bin/podman run --name uptime-kuma --rm \
+        -p 127.0.0.1:{{ uptime_kuma_port }}:3001 \
+        -v {{ uptime_kuma_data_dir }}:/app/data \
+        {{ uptime_kuma_image }}
+      ExecStop=/usr/bin/podman stop uptime-kuma
+
+      [Install]
+      WantedBy=multi-user.target
+    mode: '0644'
+  notify:
+    - Reload systemd
+    - Restart Uptime Kuma
+
+- name: Enable and start Uptime Kuma service
+  systemd:
+    name: uptime-kuma
+    state: started
+    enabled: yes
+    daemon_reload: yes

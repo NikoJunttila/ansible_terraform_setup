@@ -1,0 +1,8 @@
+---
+autokuma_image: "ghcr.io/bigboot/autokuma:latest"
+autokuma_data_dir: "/opt/autokuma/data"
+autokuma_static_monitors_dir: "/opt/autokuma/monitors"
+
+# Uptime Kuma connection
+uptime_kuma_port: 3001
+uptime_kuma_username: randomderp

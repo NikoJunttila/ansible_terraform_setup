@@ -1,0 +1,15 @@
+# Managed by Ansible - do not edit manually
+[kuma]
+url = "http://127.0.0.1:{{ uptime_kuma_port }}/"
+{% if uptime_kuma_username is defined and uptime_kuma_username %}
+username = "{{ uptime_kuma_username }}"
+{% else %}
+# failed to find username
+{% endif %}
+{% if uptime_kuma_password is defined and uptime_kuma_password %}
+password = "{{ uptime_kuma_password }}"
+{% endif %}
+
+[docker]
+hosts = ["unix:///var/run/podman/podman.sock"]
+label_prefix = "kuma"
