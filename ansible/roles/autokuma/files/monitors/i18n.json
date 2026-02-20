@@ -1,7 +1,7 @@
 {
     "type": "http",
-    "name": "Passwords - Vaultwarden",
-    "url": "https://passwords.junttila.dev",
+    "name": "JSON - I18n",
+    "url": "https://json.junttila.dev/",
     "interval": 180,
     "maxretries": 3,
     "retry_interval": 60

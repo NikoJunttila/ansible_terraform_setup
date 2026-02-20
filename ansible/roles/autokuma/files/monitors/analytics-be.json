@@ -1,7 +1,7 @@
 {
     "type": "http",
-    "name": "Passwords - Vaultwarden",
-    "url": "https://passwords.junttila.dev",
+    "name": "Analytics BE",
+    "url": "https://backend.pi.junttila.dev/v1/healthz",
     "interval": 180,
     "maxretries": 3,
     "retry_interval": 60

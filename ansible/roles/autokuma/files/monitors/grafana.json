@@ -2,7 +2,7 @@
     "type": "http",
     "name": "Grafana Dashboard",
     "url": "https://grafana.junttila.dev",
-    "interval": 120,
+    "interval": 180,
     "maxretries": 3,
     "retry_interval": 60
 }

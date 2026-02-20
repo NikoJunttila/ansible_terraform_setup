@@ -14,6 +14,7 @@ ExecStart=/usr/bin/podman run --name autokuma --rm \
   --network host \
   -v {{ autokuma_static_monitors_dir }}:/app/monitors:ro \
   -v {{ autokuma_data_dir }}/autokuma.toml:/app/autokuma.toml:ro \
+  -v {{ autokuma_data_dir }}:/data \
   -v /run/podman/podman.sock:/var/run/docker.sock:ro \
   -e AUTOKUMA__KUMA__URL=http://127.0.0.1:{{ uptime_kuma_port }} \
 {% if uptime_kuma_username is defined and uptime_kuma_username %}
