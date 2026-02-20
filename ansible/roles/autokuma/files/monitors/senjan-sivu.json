@@ -1,0 +1,8 @@
+{
+    "type": "http",
+    "name": "SAJ",
+    "url": "https://sajportfolio.com",
+    "interval": 180,
+    "maxretries": 3,
+    "retry_interval": 30
+}

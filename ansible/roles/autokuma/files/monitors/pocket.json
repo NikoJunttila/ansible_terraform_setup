@@ -1,0 +1,8 @@
+{
+    "type": "http",
+    "name": "Pocket",
+    "url": "https://pocket.junttila.dev/api/health",
+    "interval": 180,
+    "maxretries": 3,
+    "retry_interval": 30
+}
