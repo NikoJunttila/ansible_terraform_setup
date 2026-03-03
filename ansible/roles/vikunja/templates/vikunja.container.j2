@@ -1,0 +1,24 @@
+[Unit]
+Description=Vikunja Service
+After=network-online.target
+
+[Container]
+Image={{ vikunja_image }}
+AutoUpdate=registry
+User=1000:1000
+PublishPort={{ vikunja_port }}:3456
+Environment=VIKUNJA_SERVICE_PUBLICURL={{ vikunja_service_public_url }}
+Environment=VIKUNJA_SERVICE_JWTSECRET={{ vikunja_service_jwt_secret }}
+Environment=VIKUNJA_DATABASE_TYPE={{ vikunja_database_type }}
+Environment=VIKUNJA_DATABASE_PATH={{ vikunja_database_path }}
+
+Volume={{ vikunja_dest }}/files:/app/vikunja/files:z
+Volume={{ vikunja_dest }}/db:/app/vikunja/db:z
+
+LogDriver=journald
+LogOpt=tag={{ '{{.Name}}' }}
+SecurityLabelDisable=true
+PodmanArgs=--security-opt=seccomp=unconfined
+
+[Install]
+WantedBy=multi-user.target

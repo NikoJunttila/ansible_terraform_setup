@@ -1,0 +1,8 @@
+---
+vikunja_image: "docker.io/vikunja/vikunja:latest"
+vikunja_dest: "/opt/vikunja"
+vikunja_port: 3456
+vikunja_service_public_url: "https://todo.junttila.dev"
+vikunja_service_jwt_secret: "superrandomstring"
+vikunja_database_type: "sqlite"
+vikunja_database_path: "/app/vikunja/db/vikunja.db"

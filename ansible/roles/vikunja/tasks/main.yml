@@ -1,0 +1,54 @@
+- name: Ensure Podman is installed
+  ansible.builtin.apt:
+    name: podman
+    state: present
+
+- name: Create auto-update override directory
+  ansible.builtin.file:
+    path: /etc/systemd/system/podman-auto-update.timer.d
+    state: directory
+    mode: '0755'
+
+- name: Configure auto-update schedule
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/podman-auto-update.timer.d/override.conf
+    mode: '0644'
+    content: |
+      [Timer]
+      OnCalendar=daily
+      Persistent=true
+  notify: Reload systemd
+
+- name: Enable auto-update timer
+  ansible.builtin.systemd:
+    name: podman-auto-update.timer
+    enabled: true
+    state: started
+
+- name: Ensure Vikunja directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "1000"
+    group: "1000"
+    mode: '0755'
+  loop:
+    - "{{ vikunja_dest }}"
+    - "{{ vikunja_dest }}/files"
+    - "{{ vikunja_dest }}/db"
+
+- name: Deploy Quadlet container file
+  ansible.builtin.template:
+    src: vikunja.container.j2
+    dest: /etc/containers/systemd/vikunja.container
+    mode: '0644'
+  notify: Reload systemd
+
+- name: Flush handlers to ensure systemd is reloaded before starting service
+  ansible.builtin.meta: flush_handlers
+
+- name: Enable and start Vikunja service
+  ansible.builtin.systemd:
+    name: vikunja.service
+    enabled: true
+    state: started

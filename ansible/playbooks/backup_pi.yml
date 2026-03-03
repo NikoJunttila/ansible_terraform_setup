@@ -12,6 +12,7 @@
       loop:
         - vaultwarden
         - memos
+        - vikunja
 
     - name: Pull Vaultwarden data from Pi
       synchronize:
@@ -29,6 +30,17 @@
       synchronize:
         src: /opt/memos/
         dest: "{{ playbook_dir }}/../backups/memos/"
+        mode: pull
+        archive: yes
+        rsync_opts:
+          - "--exclude=*.log"
+          - "--exclude=*-shm"
+          - "--exclude=*-wal"
+
+    - name: Pull Vikunja data from Pi
+      synchronize:
+        src: /opt/vikunja/
+        dest: "{{ playbook_dir }}/../backups/vikunja/"
         mode: pull
         archive: yes
         rsync_opts:

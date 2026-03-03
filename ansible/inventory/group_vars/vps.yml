@@ -67,3 +67,6 @@ caddy_sites:
 
   - domain: status.junttila.dev
     backend: "{{ localhost }}:3001"
+
+  - domain: todo.junttila.dev
+    backend: "{{ backend_ip }}:3456"
