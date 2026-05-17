@@ -70,3 +70,12 @@ caddy_sites:
 
   - domain: todo.junttila.dev
     backend: "{{ backend_ip }}:3456"
+
+  - domain: vendure.junttila.dev
+    backend: "{{ backend_ip }}:4141"
+
+  - domain: store.junttila.dev
+    backend: "{{ backend_ip }}:4142"
+
+
+

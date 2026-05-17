@@ -1,0 +1,42 @@
+---
+- name: Ensure Podman is installed
+  apt:
+    name: podman
+    state: present
+
+- name: Create auto-update override directory
+  file:
+    path: /etc/systemd/system/podman-auto-update.timer.d
+    state: directory
+    mode: '0755'
+
+- name: Configure auto-update schedule
+  copy:
+    dest: /etc/systemd/system/podman-auto-update.timer.d/override.conf
+    content: |
+      [Timer]
+      OnCalendar=daily
+      Persistent=true
+  notify: Reload systemd
+
+- name: Enable auto-update timer
+  systemd:
+    name: podman-auto-update.timer
+    enabled: true
+    state: started
+
+- name: Deploy Quadlet container file
+  template:
+    src: sveltekit-vendure-storefront.container.j2
+    dest: /etc/containers/systemd/sveltekit-vendure-storefront.container
+    mode: '0644'
+  notify: Reload systemd
+
+- name: Flush handlers to ensure systemd is reloaded before starting service
+  meta: flush_handlers
+
+- name: Enable and start sveltekit-vendure-storefront service
+  systemd:
+    name: sveltekit-vendure-storefront.service
+    enabled: true
+    state: started
