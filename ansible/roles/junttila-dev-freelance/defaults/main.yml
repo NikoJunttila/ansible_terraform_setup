@@ -1,0 +1,4 @@
+---
+APP_IMAGE: ghcr.io/nikojunttila/junttila-dev-freelance:latest
+PORT: 8200
+NODE_ENV: production

@@ -1,0 +1,17 @@
+[Unit]
+Description=Junttila Dev Freelance Site
+After=network-online.target
+
+[Container]
+Image={{ APP_IMAGE }}
+AutoUpdate=registry
+PublishPort={{ PORT }}:{{ PORT }}
+Environment=PORT={{ PORT }}
+Environment=NODE_ENV={{ NODE_ENV }}
+Environment=RESEND_API_KEY={{ vault_resend_api_key }}
+AddHost=host.containers.internal:host-gateway
+LogDriver=journald
+LogOpt=tag={{ '{{.Name}}' }}
+
+[Install]
+WantedBy=multi-user.target

@@ -77,5 +77,8 @@ caddy_sites:
   - domain: store.junttila.dev
     backend: "{{ backend_ip }}:4142"
 
+  - domain: freelance.junttila.dev
+    backend: "{{ backend_ip }}:8200"
+
 
 

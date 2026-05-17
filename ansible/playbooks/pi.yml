@@ -22,6 +22,7 @@
     - { role: useranalytics-svelte, tags: analytics }
     - { role: translations, tags: translations }
     - { role: sveltekit-vendure-storefront, tags: storefront }
+    - { role: junttila-dev-freelance, tags: freelance }
 
     # ansible-playbook playbooks/pi.yml --tags "monitoring,grafana"
     - { role: grafana, tags: grafana }
