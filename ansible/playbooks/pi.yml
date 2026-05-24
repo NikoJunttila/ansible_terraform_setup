@@ -34,3 +34,4 @@
     - {role: calendar-app, tags: calendar-app}
     
     - {role: vikunja, tags: vikunja}
+    - {role: woocommerce, tags: woocommerce}

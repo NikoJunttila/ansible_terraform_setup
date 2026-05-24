@@ -80,5 +80,8 @@ caddy_sites:
   - domain: freelance.junttila.dev
     backend: "{{ backend_ip }}:8200"
 
+  - domain: woo.junttila.dev
+    backend: "{{ backend_ip }}:8080"
+
 
 

@@ -1,0 +1,24 @@
+---
+woocommerce_dest: "/opt/woocommerce"
+woocommerce_public_url: "https://woo.junttila.dev"
+woocommerce_old_url: "http://localhost:8080"
+
+# Path on the Ansible control machine where backup.sh writes tarballs
+woocommerce_local_backup_dir: "{{ lookup('env', 'HOME') }}/docker/woocommerce/backups"
+
+# Re-run the restore flow even if /opt/woocommerce/.restored exists
+woocommerce_force_restore: false
+
+# Container images
+woocommerce_wp_image: "docker.io/library/wordpress:latest"
+woocommerce_wpcli_image: "docker.io/library/wordpress:cli"
+woocommerce_db_image: "docker.io/library/mariadb:11"
+
+# Host port published by the wordpress container
+woocommerce_http_port: 8080
+
+# Database credentials (plaintext for now; move to vault later)
+woocommerce_db_name: "wordpress"
+woocommerce_db_user: "wordpress"
+woocommerce_db_password: "wppass"
+woocommerce_db_root_password: "rootpass"

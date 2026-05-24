@@ -1,0 +1,5 @@
+---
+- name: Restart WooCommerce stack
+  ansible.builtin.command:
+    cmd: podman-compose up -d db wordpress
+    chdir: "{{ woocommerce_dest }}"

@@ -1,0 +1,43 @@
+services:
+  db:
+    image: {{ woocommerce_db_image }}
+    environment:
+      MARIADB_ROOT_PASSWORD: {{ woocommerce_db_root_password }}
+      MARIADB_DATABASE: {{ woocommerce_db_name }}
+      MARIADB_USER: {{ woocommerce_db_user }}
+      MARIADB_PASSWORD: {{ woocommerce_db_password }}
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: unless-stopped
+
+  wordpress:
+    image: {{ woocommerce_wp_image }}
+    depends_on: [db]
+    ports:
+      - "{{ woocommerce_http_port }}:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: {{ woocommerce_db_user }}
+      WORDPRESS_DB_PASSWORD: {{ woocommerce_db_password }}
+      WORDPRESS_DB_NAME: {{ woocommerce_db_name }}
+    volumes:
+      - wp_data:/var/www/html
+    restart: unless-stopped
+
+  # Invoked ad-hoc with: podman-compose run --rm wpcli wp <command>
+  # Not started by `up -d db wordpress`; only runs when explicitly invoked.
+  wpcli:
+    image: {{ woocommerce_wpcli_image }}
+    depends_on: [db]
+    user: "33:33"
+    volumes:
+      - wp_data:/var/www/html
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: {{ woocommerce_db_user }}
+      WORDPRESS_DB_PASSWORD: {{ woocommerce_db_password }}
+      WORDPRESS_DB_NAME: {{ woocommerce_db_name }}
+
+volumes:
+  db_data:
+  wp_data:

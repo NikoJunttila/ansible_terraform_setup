@@ -1,0 +1,217 @@
+---
+- name: Ensure podman-compose is installed
+  ansible.builtin.apt:
+    name: podman-compose
+    state: present
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Ensure WooCommerce directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: derp
+    group: derp
+    mode: '0755'
+  loop:
+    - "{{ woocommerce_dest }}"
+    - "{{ woocommerce_dest }}/staging"
+
+- name: Find latest local backup tarball
+  ansible.builtin.find:
+    paths: "{{ woocommerce_local_backup_dir }}"
+    patterns: "wc-backup-*.tar.gz"
+    file_type: file
+  delegate_to: localhost
+  become: no
+  register: woocommerce_local_backups
+
+- name: Fail if no local backup tarball was found
+  ansible.builtin.fail:
+    msg: >-
+      No wc-backup-*.tar.gz files found in {{ woocommerce_local_backup_dir }}.
+      Run `cd ~/docker/woocommerce && ./backup.sh` on the dev machine first.
+  when: woocommerce_local_backups.files | length == 0
+
+- name: Select newest backup tarball
+  ansible.builtin.set_fact:
+    woocommerce_backup_src: >-
+      {{ (woocommerce_local_backups.files | sort(attribute='mtime') | last).path }}
+
+- name: Copy backup tarball to Pi
+  ansible.builtin.copy:
+    src: "{{ woocommerce_backup_src }}"
+    dest: "{{ woocommerce_dest }}/staging/wc-backup.tar.gz"
+    owner: derp
+    group: derp
+    mode: '0644'
+
+- name: Template Pi-friendly compose.yml
+  ansible.builtin.template:
+    src: compose.yml.j2
+    dest: "{{ woocommerce_dest }}/compose.yml"
+    owner: derp
+    group: derp
+    mode: '0644'
+  notify: Restart WooCommerce stack
+
+- name: Flush handlers so compose.yml changes apply before restore
+  ansible.builtin.meta: flush_handlers
+
+- name: Check whether restore has already been applied
+  ansible.builtin.stat:
+    path: "{{ woocommerce_dest }}/.restored"
+  register: woocommerce_restore_marker
+
+- name: Run restore flow
+  when: woocommerce_force_restore or not woocommerce_restore_marker.stat.exists
+  block:
+    - name: Create extraction directory
+      ansible.builtin.file:
+        path: "{{ woocommerce_dest }}/staging/extracted"
+        state: directory
+        owner: derp
+        group: derp
+        mode: '0755'
+
+    - name: Extract backup bundle
+      ansible.builtin.unarchive:
+        src: "{{ woocommerce_dest }}/staging/wc-backup.tar.gz"
+        dest: "{{ woocommerce_dest }}/staging/extracted"
+        remote_src: yes
+        owner: derp
+        group: derp
+
+    - name: Start db and wordpress
+      ansible.builtin.command:
+        cmd: podman-compose up -d db wordpress
+        chdir: "{{ woocommerce_dest }}"
+      changed_when: true
+
+    - name: Wait for MariaDB to accept connections
+      ansible.builtin.command:
+        cmd: >-
+          podman-compose exec -T db mariadb
+          -u {{ woocommerce_db_user }}
+          -p{{ woocommerce_db_password }}
+          -e "SELECT 1"
+          {{ woocommerce_db_name }}
+        chdir: "{{ woocommerce_dest }}"
+      register: woocommerce_db_ready
+      retries: 30
+      delay: 2
+      until: woocommerce_db_ready.rc == 0
+      changed_when: false
+
+    - name: Wait for wp-config.php to be written
+      ansible.builtin.command:
+        cmd: podman-compose exec -T wordpress test -f /var/www/html/wp-config.php
+        chdir: "{{ woocommerce_dest }}"
+      register: woocommerce_wp_ready
+      retries: 30
+      delay: 2
+      until: woocommerce_wp_ready.rc == 0
+      changed_when: false
+
+    - name: Remove existing wp-content in container
+      ansible.builtin.shell:
+        cmd: >-
+          podman-compose exec -T wordpress sh -c
+          'rm -rf /var/www/html/wp-content && mkdir -p /var/www/html/wp-content'
+        chdir: "{{ woocommerce_dest }}"
+      changed_when: true
+
+    - name: Restore wp-content from backup
+      ansible.builtin.shell:
+        cmd: >-
+          podman-compose exec -T wordpress tar xzf - -C /var/www/html
+          < {{ woocommerce_dest }}/staging/extracted/wp-content.tgz
+        chdir: "{{ woocommerce_dest }}"
+      changed_when: true
+
+    - name: Fix wp-content ownership
+      ansible.builtin.command:
+        cmd: >-
+          podman-compose exec -T wordpress
+          chown -R www-data:www-data /var/www/html/wp-content
+        chdir: "{{ woocommerce_dest }}"
+      changed_when: true
+
+    - name: Import database
+      ansible.builtin.shell:
+        cmd: >-
+          podman-compose run --rm -T wpcli wp db import -
+          < {{ woocommerce_dest }}/staging/extracted/db.sql
+        chdir: "{{ woocommerce_dest }}"
+      changed_when: true
+
+    - name: Ensure mu-plugins directory exists in container
+      ansible.builtin.command:
+        cmd: >-
+          podman-compose exec -T wordpress
+          mkdir -p /var/www/html/wp-content/mu-plugins
+        chdir: "{{ woocommerce_dest }}"
+      changed_when: true
+
+    - name: Render reverse-proxy mu-plugin locally
+      ansible.builtin.template:
+        src: reverse-proxy.php.j2
+        dest: "{{ woocommerce_dest }}/staging/reverse-proxy.php"
+        owner: derp
+        group: derp
+        mode: '0644'
+
+    - name: Install reverse-proxy mu-plugin into container
+      ansible.builtin.shell:
+        cmd: >-
+          podman-compose exec -T wordpress sh -c
+          'cat > /var/www/html/wp-content/mu-plugins/reverse-proxy.php'
+          < {{ woocommerce_dest }}/staging/reverse-proxy.php
+        chdir: "{{ woocommerce_dest }}"
+      changed_when: true
+
+    - name: Chown reverse-proxy mu-plugin to www-data
+      ansible.builtin.command:
+        cmd: >-
+          podman-compose exec -T wordpress
+          chown www-data:www-data /var/www/html/wp-content/mu-plugins/reverse-proxy.php
+        chdir: "{{ woocommerce_dest }}"
+      changed_when: true
+
+    - name: Set FORCE_SSL_ADMIN based on public URL scheme
+      ansible.builtin.command:
+        cmd: >-
+          podman-compose run --rm wpcli wp config set FORCE_SSL_ADMIN
+          {{ 'true' if woocommerce_public_url.startswith('https://') else 'false' }}
+          --raw
+        chdir: "{{ woocommerce_dest }}"
+      changed_when: true
+
+    - name: Rewrite old URL to public URL across DB
+      ansible.builtin.command:
+        cmd: >-
+          podman-compose run --rm wpcli wp search-replace
+          {{ woocommerce_old_url }} {{ woocommerce_public_url }}
+          --all-tables-with-prefix --skip-columns=guid --report-changed-only
+        chdir: "{{ woocommerce_dest }}"
+      changed_when: true
+
+    - name: Flush rewrite rules
+      ansible.builtin.command:
+        cmd: podman-compose run --rm wpcli wp rewrite flush --hard
+        chdir: "{{ woocommerce_dest }}"
+      changed_when: true
+      failed_when: false
+
+    - name: Mark restore as complete
+      ansible.builtin.copy:
+        content: "{{ woocommerce_backup_src | basename }}\n"
+        dest: "{{ woocommerce_dest }}/.restored"
+        owner: derp
+        group: derp
+        mode: '0644'
+
+    - name: Remove extraction staging directory
+      ansible.builtin.file:
+        path: "{{ woocommerce_dest }}/staging/extracted"
+        state: absent
