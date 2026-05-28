@@ -9,6 +9,8 @@ PublishPort={{ PORT }}:{{ PORT }}
 Environment=PORT={{ PORT }}
 Environment=NODE_ENV={{ NODE_ENV }}
 Environment=RESEND_API_KEY={{ vault_resend_api_key }}
+Environment=MOONSHOT_API_KEY={{ vault_moonshot_api_key }}
+Environment=MOONSHOT_MODEL={{ vault_moonshot_model }}
 AddHost=host.containers.internal:host-gateway
 LogDriver=journald
 LogOpt=tag={{ '{{.Name}}' }}

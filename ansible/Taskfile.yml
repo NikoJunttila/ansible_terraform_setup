@@ -1,0 +1,142 @@
+version: '3'
+
+# Common ansible operations.
+# Run `task --list` to see all tasks.
+#
+# Vault tasks take ROLE=<role-name> and target roles/<ROLE>/vars/vault.yml,
+# or FILE=<path> to target an arbitrary file.
+# Playbook tasks take PLAY=<playbook-name> (without .yml) and optional LIMIT=<host-or-group>.
+
+tasks:
+  default:
+    cmds:
+      - task --list
+    silent: true
+
+  # -------- Inventory / connectivity --------
+
+  ping:
+    desc: Ping all hosts in the inventory
+    cmds:
+      - ansible all -m ping
+
+  inventory:
+    desc: Show inventory as a graph
+    cmds:
+      - ansible-inventory --graph
+
+  inventory-list:
+    desc: Show full inventory as JSON
+    cmds:
+      - ansible-inventory --list
+
+  # -------- Vault --------
+
+  vault-create:
+    desc: 'Create a new vault file. Usage: task vault-create ROLE=<role> | FILE=<path>'
+    preconditions:
+      - sh: '[ -n "{{.ROLE}}" ] || [ -n "{{.FILE}}" ]'
+        msg: 'Set ROLE=<role-name> or FILE=<path>'
+    cmds:
+      - ansible-vault create {{if .FILE}}{{.FILE}}{{else}}roles/{{.ROLE}}/vars/vault.yml{{end}}
+
+  vault-edit:
+    desc: 'Edit an existing vault file. Usage: task vault-edit ROLE=<role> | FILE=<path>'
+    preconditions:
+      - sh: '[ -n "{{.ROLE}}" ] || [ -n "{{.FILE}}" ]'
+        msg: 'Set ROLE=<role-name> or FILE=<path>'
+    cmds:
+      - ansible-vault edit {{if .FILE}}{{.FILE}}{{else}}roles/{{.ROLE}}/vars/vault.yml{{end}}
+
+  vault-view:
+    desc: 'View a vault file. Usage: task vault-view ROLE=<role> | FILE=<path>'
+    preconditions:
+      - sh: '[ -n "{{.ROLE}}" ] || [ -n "{{.FILE}}" ]'
+        msg: 'Set ROLE=<role-name> or FILE=<path>'
+    cmds:
+      - ansible-vault view {{if .FILE}}{{.FILE}}{{else}}roles/{{.ROLE}}/vars/vault.yml{{end}}
+
+  vault-encrypt:
+    desc: 'Encrypt a plaintext file in place. Usage: task vault-encrypt FILE=<path>'
+    preconditions:
+      - sh: '[ -n "{{.FILE}}" ]'
+        msg: 'Set FILE=<path>'
+    cmds:
+      - ansible-vault encrypt {{.FILE}}
+
+  vault-decrypt:
+    desc: 'Decrypt a vault file in place. Usage: task vault-decrypt ROLE=<role> | FILE=<path>'
+    preconditions:
+      - sh: '[ -n "{{.ROLE}}" ] || [ -n "{{.FILE}}" ]'
+        msg: 'Set ROLE=<role-name> or FILE=<path>'
+    cmds:
+      - ansible-vault decrypt {{if .FILE}}{{.FILE}}{{else}}roles/{{.ROLE}}/vars/vault.yml{{end}}
+
+  vault-rekey:
+    desc: 'Change the password on a vault file. Usage: task vault-rekey ROLE=<role> | FILE=<path>'
+    preconditions:
+      - sh: '[ -n "{{.ROLE}}" ] || [ -n "{{.FILE}}" ]'
+        msg: 'Set ROLE=<role-name> or FILE=<path>'
+    cmds:
+      - ansible-vault rekey {{if .FILE}}{{.FILE}}{{else}}roles/{{.ROLE}}/vars/vault.yml{{end}}
+
+  vault-list:
+    desc: List all vault files in roles/
+    cmds:
+      - find roles -name 'vault.yml' -type f
+
+  # -------- Playbooks --------
+
+  syntax:
+    desc: 'Check playbook syntax. Usage: task syntax PLAY=<name>'
+    preconditions:
+      - sh: '[ -n "{{.PLAY}}" ]'
+        msg: 'Set PLAY=<playbook-name> (without .yml)'
+    cmds:
+      - ansible-playbook playbooks/{{.PLAY}}.yml --syntax-check
+
+  check:
+    desc: 'Dry-run a playbook (--check --diff). Usage: task check PLAY=<name> [LIMIT=<host>]'
+    preconditions:
+      - sh: '[ -n "{{.PLAY}}" ]'
+        msg: 'Set PLAY=<playbook-name> (without .yml)'
+    cmds:
+      - ansible-playbook playbooks/{{.PLAY}}.yml --check --diff {{if .LIMIT}}-l {{.LIMIT}}{{end}}
+
+  run:
+    desc: 'Run a playbook. Usage: task run PLAY=<name> [LIMIT=<host>] [TAGS=<tags>]'
+    preconditions:
+      - sh: '[ -n "{{.PLAY}}" ]'
+        msg: 'Set PLAY=<playbook-name> (without .yml)'
+    cmds:
+      - ansible-playbook playbooks/{{.PLAY}}.yml {{if .LIMIT}}-l {{.LIMIT}}{{end}} {{if .TAGS}}--tags {{.TAGS}}{{end}}
+
+  safe-run:
+    desc: 'Safe workflow: syntax-check → dry-run → real run. Usage: task safe-run PLAY=<name> [LIMIT=<host>]'
+    cmds:
+      - task: syntax
+        vars: {PLAY: '{{.PLAY}}'}
+      - task: check
+        vars: {PLAY: '{{.PLAY}}', LIMIT: '{{.LIMIT}}'}
+      - task: run
+        vars: {PLAY: '{{.PLAY}}', LIMIT: '{{.LIMIT}}'}
+
+  lint:
+    desc: 'Lint a playbook (requires ansible-lint). Usage: task lint PLAY=<name>'
+    preconditions:
+      - sh: '[ -n "{{.PLAY}}" ]'
+        msg: 'Set PLAY=<playbook-name> (without .yml)'
+    cmds:
+      - ansible-lint playbooks/{{.PLAY}}.yml
+
+  list-plays:
+    desc: List available playbooks
+    cmds:
+      - ls playbooks/
+
+  # -------- Galaxy / dependencies --------
+
+  install:
+    desc: Install role/collection requirements
+    cmds:
+      - ansible-galaxy install -r requirements.yml
