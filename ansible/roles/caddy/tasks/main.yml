@@ -41,6 +41,14 @@
   debug:
     var: caddy_sites
 
+- name: Ensure sites.d directory for drop-in site files exists
+  file:
+    path: /etc/caddy/sites.d
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
 - name: Configure Caddyfile
   template:
     src: Caddyfile.j2

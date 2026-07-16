@@ -6,6 +6,10 @@
     metrics
 }
 
+# Drop-in site files owned by other repos (e.g. go-svelte deploy/ansible).
+# A glob with no matches is valid, so this is safe with an empty sites.d.
+import /etc/caddy/sites.d/*.caddy
+
 {% for site in caddy_sites %}
 {{ site.domain }} {
     {% set ups = site.backends if (site.backends is defined and (site.backends | length) > 0) else [site.backend] %}
