@@ -1,0 +1,54 @@
+# One-off cleanup: shut down services that are no longer used.
+#
+# Usage:
+#   ansible-playbook -i inventory/inventory.ini playbooks/decommission_unused.yml --limit pi
+#
+# Notes:
+# - Data directories/volumes are intentionally left on disk (not deleted).
+# - hur-control-app is deployed by a separate ansible/CI pipeline (its quadlet
+#   file says so). This playbook only stops it here; that other pipeline needs
+#   to stop deploying it or it will come back on its next run.
+
+- name: Decommission unused services on Pi
+  hosts: pi
+  become: yes
+  tasks:
+    - name: Stop and disable Vikunja quadlet service
+      ansible.builtin.systemd:
+        name: vikunja.service
+        state: stopped
+        enabled: false
+      failed_when: false
+
+    - name: Remove Vikunja quadlet unit file
+      ansible.builtin.file:
+        path: /etc/containers/systemd/vikunja.container
+        state: absent
+      notify: Reload systemd
+
+    - name: Remove Shiori container
+      containers.podman.podman_container:
+        name: shiori-app
+        state: absent
+
+    - name: Remove WithoutBG container
+      containers.podman.podman_container:
+        name: withoutbg-app
+        state: absent
+
+    - name: Remove obsidian-livesync (couchdb) container
+      containers.podman.podman_container:
+        name: obsidian-livesync
+        state: absent
+
+    - name: Stop and disable hur-control-app quadlet service
+      ansible.builtin.systemd:
+        name: hur-control-app.service
+        state: stopped
+        enabled: false
+      failed_when: false
+
+  handlers:
+    - name: Reload systemd
+      ansible.builtin.systemd:
+        daemon_reload: true

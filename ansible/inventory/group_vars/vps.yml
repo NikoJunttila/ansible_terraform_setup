@@ -18,8 +18,6 @@ caddy_sites:
   - domain: analytics.junttila.dev  
     backend: "{{ backend_ip }}:8102"
 
-  - domain: bookmarks.pi.junttila.dev  
-    backend: "{{ backend_ip }}:8100"
   #analytics backend
   - domain: backend.pi.junttila.dev
     backend: "{{ backend_ip }}:8000"
@@ -29,9 +27,6 @@ caddy_sites:
 
   - domain: books.junttila.dev
     backend: "{{ backend_ip }}:5421"
-
-  - domain: bg.junttila.dev
-    backend: "{{ backend_ip }}:4477"
 
   - domain: pocket.junttila.dev
     backends:
@@ -67,9 +62,6 @@ caddy_sites:
 
   - domain: status.junttila.dev
     backend: "{{ localhost }}:3001"
-
-  - domain: todo.junttila.dev
-    backend: "{{ backend_ip }}:3456"
 
   - domain: vendure.junttila.dev
     backend: "{{ backend_ip }}:4141"

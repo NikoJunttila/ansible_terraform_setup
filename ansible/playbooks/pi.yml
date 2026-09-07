@@ -12,8 +12,6 @@
     - { role: vaultwarden, tags: vaultwarden }
     
     - { role: jellyfin, tags: jellyfin }
-    #- { role: shiori, tags: shiori }
-    - { role: withoutbg, tags: withoutbg }
     - { role: memos, tags: memos }
     - { role: kavita, tags: kavita }
     - { role: ocis, tags: ocis }
@@ -32,6 +30,5 @@
     # - { role: node_exporter, tags: ["monitoring", "node_exporter"] } //not needed with current alloy config. alloy can scrape the data itself and send to prometheus.
 # ansible-playbook playbooks/pi.yml --tags "calendar-app" -K --vault-password-file ~/.ansible_vault_pass
     - {role: calendar-app, tags: calendar-app}
-    
-    - {role: vikunja, tags: vikunja}
+
     - {role: woocommerce, tags: woocommerce}
