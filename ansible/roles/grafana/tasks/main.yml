@@ -61,4 +61,4 @@
       - "{{ grafana_data_dir }}/dashboards:/var/lib/grafana/dashboards:Z"
     etc_hosts:
       host.containers.internal: "host-gateway"
-    restart_policy: unless-stopped
+    restart_policy: always

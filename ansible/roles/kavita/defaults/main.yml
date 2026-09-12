@@ -17,4 +17,4 @@ kavita_books_dir: "{{ kavita_base_dir }}/books"
 
 # Container state
 kavita_container_state: started
-kavita_container_restart_policy: unless-stopped
+kavita_container_restart_policy: always

@@ -8,3 +8,33 @@
   apt:
     name: podman
     state: present
+
+# Podman has no daemon: restart_policy only makes conmon restart a container that
+# crashes while the host is up. Nothing starts containers at boot. podman-restart
+# ships with podman (WantedBy=default.target, After=network-online.target) and runs
+# `podman start --all --filter restart-policy=always` -- it is what brings plain
+# podman_container services back after a reboot. Note the filter: it matches
+# restart-policy=always ONLY, so `unless-stopped` containers are never started.
+- name: Enable podman-restart.service so containers survive a reboot
+  ansible.builtin.systemd:
+    name: podman-restart.service
+    enabled: yes
+    state: started
+    daemon_reload: yes
+
+- name: Ensure containers.conf.d exists
+  ansible.builtin.file:
+    path: /etc/containers/containers.conf.d
+    state: directory
+    mode: '0755'
+
+# Applies to new containers only; existing ones keep the resolv.conf they were
+# created with until they are recreated.
+- name: Give containers a resolver they can reach
+  ansible.builtin.copy:
+    dest: /etc/containers/containers.conf.d/dns.conf
+    mode: '0644'
+    content: |
+      # Managed by Ansible (roles/podman) -- see podman_dns_servers.
+      [containers]
+      dns_servers = {{ podman_dns_servers | to_json }}

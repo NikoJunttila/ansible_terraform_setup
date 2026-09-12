@@ -33,4 +33,4 @@
       - "{{ tempo_data_dir }}/blocks:/var/tempo/blocks:Z"
     command:
       - "-config.file=/etc/tempo/tempo.yaml"
-    restart_policy: unless-stopped
+    restart_policy: always

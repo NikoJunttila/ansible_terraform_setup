@@ -1,0 +1,9 @@
+---
+# Resolvers handed to every container. The host's /etc/resolv.conf is owned by
+# Tailscale and points at MagicDNS (100.100.100.100), which SERVFAILs queries
+# arriving from the podman bridge -- so containers must not inherit it.
+# First entry is pihole on this host's LAN address (pihole-FTL binds 127.0.0.1
+# and the LAN address, never the bridge gateway); second is the router.
+podman_dns_servers:
+  - "{{ ansible_default_ipv4.address }}"
+  - "{{ ansible_default_ipv4.gateway }}"

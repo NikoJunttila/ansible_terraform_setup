@@ -1,5 +1,6 @@
 [Unit]
 Description=Translations Helper Service
+Wants=network-online.target
 After=network-online.target
 
 [Container]
@@ -24,6 +25,10 @@ HealthInterval=30s
 HealthTimeout=5s
 HealthRetries=3
 HealthStartPeriod=30s
+
+[Service]
+Restart=always
+RestartSec=10
 
 [Install]
 WantedBy=multi-user.target

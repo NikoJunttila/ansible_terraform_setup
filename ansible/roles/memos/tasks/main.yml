@@ -17,4 +17,4 @@
       TZ: "{{ memos_timezone }}"
     volume:
       - /opt/memos:/var/opt/memos
-    restart_policy: unless-stopped
+    restart_policy: always

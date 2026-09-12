@@ -51,7 +51,7 @@
     name: calendar
     image: calendar-app:latest
     state: started
-    restart_policy: unless-stopped
+    restart_policy: always
     ports:
       - "{{ calendar_app_port }}:{{ calendar_app_container_port }}"
     volumes:

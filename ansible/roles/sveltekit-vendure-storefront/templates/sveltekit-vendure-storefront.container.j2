@@ -1,5 +1,6 @@
 [Unit]
 Description=SvelteKit Vendure Storefront
+Wants=network-online.target
 After=network-online.target
 
 [Container]
@@ -33,6 +34,10 @@ Environment=PUBLIC_GOOGLE_TAG_MANAGER={{ PUBLIC_GOOGLE_TAG_MANAGER }}
 AddHost=host.containers.internal:host-gateway
 LogDriver=journald
 LogOpt=tag={{ '{{.Name}}' }}
+
+[Service]
+Restart=always
+RestartSec=10
 
 [Install]
 WantedBy=multi-user.target

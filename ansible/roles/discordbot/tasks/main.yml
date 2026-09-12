@@ -40,4 +40,5 @@
     image: tpx-bot:latest
     state: started
     env_file: /opt/tpxbot/.env
+    restart_policy: always
     recreate: "{{ git_clone.changed or env_file.changed or image_build.changed }}"
