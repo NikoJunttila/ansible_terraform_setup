@@ -78,3 +78,10 @@ caddy_sites:
 
   - domain: woo.junttila.dev
     backend: "{{ backend_ip }}:8080"
+
+# Resolvers handed to containers by roles/podman. The role default (host LAN
+# address + gateway) only works on the Pi, where pihole listens there. On the
+# VPS use the Hetzner recursive resolvers, which eth0 already uses.
+podman_dns_servers:
+  - "185.12.64.1"
+  - "185.12.64.2"
