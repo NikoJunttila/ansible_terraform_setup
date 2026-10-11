@@ -34,3 +34,15 @@ variable "ssh_user" {
   type        = string
   default     = "derp"
 }
+
+variable "cloudflare_account_id" {
+  description = "Cloudflare account that owns the DNS zones"
+  type        = string
+  default     = "72700dc7c837a3ebb01d99152172384d"
+}
+
+variable "domain" {
+  description = "Primary domain managed in Cloudflare"
+  type        = string
+  default     = "junttila.dev"
+}

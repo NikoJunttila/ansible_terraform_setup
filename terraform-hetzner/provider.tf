@@ -7,9 +7,16 @@ terraform {
       # How to check current version?
       # version = "~> 1.0"
     }
+    cloudflare = {
+      source  = "cloudflare/cloudflare"
+      version = "~> 5.27"
+    }
   }
 }
 
 provider "hcloud" {
   token = var.hcloud_token
 }
+
+# reads the token from the CLOUDFLARE_API_TOKEN env var
+provider "cloudflare" {}

@@ -26,3 +26,5 @@ terraform.rc
 
 # Plan output
 *.tfplan
+# Local secrets (CLOUDFLARE_API_TOKEN, TF_VAR_hcloud_token)
+.env
