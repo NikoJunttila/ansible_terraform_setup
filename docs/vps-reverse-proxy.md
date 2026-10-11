@@ -140,7 +140,7 @@ curl -I https://vaultwarden.pi.junttila.dev
 
 3. Re-run the playbook:
    ```bash
-   ./scripts/provision-vps.sh tskey-auth-xxxxx dummy dummy
+   ./scripts/provision-vps.sh tskey-auth-xxxxx
    ```
 
 4. Add DNS A record for the new subdomain

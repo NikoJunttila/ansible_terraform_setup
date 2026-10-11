@@ -3,7 +3,7 @@ set -e
 
 # Provisions the VPS as a reverse proxy using Ansible
 #
-# Sites are configured in: ansible/group_vars/vps.yml
+# Sites are configured in: ansible/inventory/group_vars/vps.yml
 # Backend IPs should be Tailscale IPs (100.x.x.x), not public IPs
 #
 #   ./provision-vps.sh <ip_address>
@@ -41,35 +41,26 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-# Go to terraform-hetzner directory to get outputs
-cd "$PROJECT_ROOT/terraform-hetzner"
+# Host, SSH user and key come from the [vps] group in the inventory
+INVENTORY="$PROJECT_ROOT/ansible/inventory/inventory.ini"
+SITES_CONFIG="$PROJECT_ROOT/ansible/inventory/group_vars/vps.yml"
 
 # Get Public IP from Terraform if not provided
 if [ -z "$IP" ]; then
-    IP=$(terraform output -raw server_ipv4 2>/dev/null || echo "")
+    IP=$(cd "$PROJECT_ROOT/terraform-hetzner" && terraform output -raw server_ipv4 2>/dev/null || echo "")
 fi
 
-if [ -z "$IP" ]; then
-    echo "Error: Could not get IP from Terraform. Is the VPS infrastructure up?"
-    echo "Run 'terraform apply' in terraform-hetzner/ first."
-    exit 1
+# Override the inventory's ansible_host when we know the current IP
+HOST_OVERRIDE=()
+if [ -n "$IP" ]; then
+    HOST_OVERRIDE=(--extra-vars "ansible_host=$IP")
+else
+    echo "Note: no IP given and no Terraform output found; using ansible_host from $INVENTORY"
+    IP=$(grep -A1 '^\[vps\]' "$INVENTORY" | sed -n 's/.*ansible_host=\([^ ]*\).*/\1/p')
 fi
 
-# Private key path
-PRIVATE_KEY_PATH="${VPS_SSH_KEY:-$HOME/.ssh/vps-proxy}"
-
-if [ ! -f "$PRIVATE_KEY_PATH" ]; then
-    echo "Error: SSH private key not found at $PRIVATE_KEY_PATH"
-    echo "Set VPS_SSH_KEY environment variable to specify a different path."
-    exit 1
-fi
-
-# Check if sites config exists
-SITES_CONFIG="$PROJECT_ROOT/ansible/group_vars/vps.yml"
 if [ ! -f "$SITES_CONFIG" ]; then
-    echo "Warning: $SITES_CONFIG not found."
-    echo "Copy the example and configure your sites:"
-    echo "  cp ansible/group_vars/vps.yml.example ansible/group_vars/vps.yml"
+    echo "Warning: $SITES_CONFIG not found. No Caddy sites will be configured."
     echo ""
 fi
 
@@ -77,7 +68,7 @@ echo "================================================"
 echo "Provisioning VPS Reverse Proxy"
 echo "================================================"
 echo "VPS IP:      $IP"
-echo "SSH Key:     $PRIVATE_KEY_PATH"
+echo "Inventory:   $INVENTORY"
 echo "Sites:       $SITES_CONFIG"
 echo "================================================"
 echo ""
@@ -85,12 +76,11 @@ echo ""
 # Go to ansible directory
 cd "$PROJECT_ROOT/ansible"
 
-# Run VPS proxy playbook
+# Run VPS proxy playbook (group_vars/vps.yml is loaded via the inventory)
 ansible-playbook playbooks/vps-proxy.yml \
-    -i "$IP," \
-    --private-key "$PRIVATE_KEY_PATH" \
-    -u ubuntu \
-    -e @group_vars/vps.yml \
+    -i "$INVENTORY" \
+    --limit vps \
+    "${HOST_OVERRIDE[@]}" \
     --extra-vars "tailscale_authkey=$TAILSCALE_KEY"
 
 echo ""

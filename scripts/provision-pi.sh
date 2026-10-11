@@ -17,9 +17,9 @@ echo "Provisioning local Raspberry Pi (pihole)..."
 cd "$(dirname "$0")/../ansible"
 
 # Run site playbook
-# Please ensure you have run 'ssh-copy-id -i ~/.ssh/ansible-lab ubuntu@pihole' first.
+# Host, SSH user and key come from the [pi] group in the inventory
 ansible-playbook playbooks/pi.yml \
-    -i inventory/pi.ini \
+    -i inventory/inventory.ini \
     --ask-vault-pass \
     --extra-vars "tailscale_authkey=$TAILSCALE_KEY" \
     -K
@@ -28,8 +28,8 @@ echo "Provisioning complete!"
 echo ""
 echo "================================================"
 echo "Tailscale IPv4 Address:"
-ssh -i ~/.ssh/ansible-lab -o StrictHostKeyChecking=no ubuntu@192.168.178.32 "tailscale ip -4"
+ansible pi -i inventory/inventory.ini -m command -a "tailscale ip -4" -o
 echo "================================================"
 echo ""
-echo "Use this IP as 'backend_ip' in ansible/group_vars/vps.yml"
+echo "Use this IP as 'backend_ip' in ansible/inventory/group_vars/vps.yml"
 echo ""
