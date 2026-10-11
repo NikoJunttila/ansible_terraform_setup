@@ -1,11 +1,11 @@
 # Tailscale Funnel Quick Start
 
-This guide explains how to set up Tailscale Funnel on your EC2 instance using Ansible.
+This guide explains how to set up Tailscale Funnel on your Raspberry Pi using Ansible.
 
 ## Prerequisites
 
 1. A [Tailscale account](https://tailscale.com/) (free tier is fine).
-2. An EC2 instance provisioned with Terraform (`terraform apply`).
+2. A Raspberry Pi reachable over SSH and listed in `ansible/inventory/inventory.ini` (see the root `README.md`).
 
 ---
 
@@ -29,40 +29,30 @@ You need to pass the auth key to Ansible when running the playbook.
 ### Option A: Direct Ansible Command
 
 ```bash
-# Get the IP from Terraform
-cd terraform && IP=$(terraform output -raw public_ip) && cd ..
-
-# Run with auth key
 cd ansible
-ansible-playbook playbooks/site.yml \
-    -i "$IP," \
-    --private-key ~/.ssh/ansible-lab \
-    -u ubuntu \
+ansible-playbook playbooks/pi.yml \
+    --tags tailscale \
+    --ask-vault-pass \
+    -K \
     --extra-vars "tailscale_authkey=tskey-auth-YOUR_KEY_HERE"
 ```
 
-### Option B: Modify provision.sh
-
-Add the auth key as an environment variable or argument to `scripts/provision.sh`:
+### Option B: Provisioning Script
 
 ```bash
-# Example: ./scripts/provision.sh tskey-auth-YOUR_KEY_HERE
-TAILSCALE_KEY="${1:-}"  # First argument
-
-ansible-playbook playbooks/site.yml \
-    -i "$IP," \
-    ... \
-    --extra-vars "tailscale_authkey=$TAILSCALE_KEY"
+./scripts/provision-pi.sh tskey-auth-YOUR_KEY_HERE
+# or
+TAILSCALE_AUTHKEY=tskey-auth-YOUR_KEY_HERE ./scripts/provision-pi.sh
 ```
 
 ---
 
 ## Step 3: Verify Tailscale is Running
 
-SSH into your instance and check:
+SSH into your Pi and check:
 
 ```bash
-ssh -i ~/.ssh/ansible-lab ubuntu@<IP>
+ssh derp@<pi-local-ip>
 tailscale status
 ```
 
@@ -75,7 +65,7 @@ You should see your machine listed in the Tailscale network.
 Once Tailscale is running, enable Funnel to expose Vaultwarden (port 80):
 
 ```bash
-# On the EC2 instance:
+# On the Pi:
 sudo tailscale funnel 80
 ```
 

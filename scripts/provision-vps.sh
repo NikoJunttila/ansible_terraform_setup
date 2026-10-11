@@ -41,17 +41,17 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-# Go to terraform-vps directory to get outputs
-cd "$PROJECT_ROOT/terraform-vps"
+# Go to terraform-hetzner directory to get outputs
+cd "$PROJECT_ROOT/terraform-hetzner"
 
 # Get Public IP from Terraform if not provided
 if [ -z "$IP" ]; then
-    IP=$(terraform output -raw vps_public_ip 2>/dev/null || echo "")
+    IP=$(terraform output -raw server_ipv4 2>/dev/null || echo "")
 fi
 
 if [ -z "$IP" ]; then
     echo "Error: Could not get IP from Terraform. Is the VPS infrastructure up?"
-    echo "Run 'terraform apply' in terraform-vps/ first."
+    echo "Run 'terraform apply' in terraform-hetzner/ first."
     exit 1
 fi
 

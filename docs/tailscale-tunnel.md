@@ -8,7 +8,7 @@ Given your setup, the VPS Proxy approach seems best for a production-like enviro
 
 # Tailscale Tunnel Setup Guide
 
-This document explains how to expose services running on a home Raspberry Pi (or EC2 instance for testing) to the public internet **without opening ports on your router**, using Tailscale.
+This document explains how to expose services running on a home Raspberry Pi to the public internet **without opening ports on your router**, using Tailscale.
 
 ## Goal
 
@@ -36,7 +36,7 @@ Tailscale Funnel lets you expose a local service to the internet using Tailscale
 
 ### Setup
 
-1.  **Install Tailscale** on your Pi/EC2:
+1.  **Install Tailscale** on your Pi:
     ```bash
     curl -fsSL https://tailscale.com/install.sh | sh
     sudo tailscale up

@@ -1,6 +1,6 @@
 # VPS Reverse Proxy Setup Guide
 
-This guide walks you through exposing services running on a home Raspberry Pi to the internet using a cheap AWS VPS as a reverse proxy, connected via Tailscale.
+This guide walks you through exposing services running on a home Raspberry Pi to the internet using a cheap Hetzner Cloud VPS as a reverse proxy, connected via Tailscale.
 
 ## Architecture
 
@@ -12,7 +12,7 @@ This guide walks you through exposing services running on a home Raspberry Pi to
   ┌─────────────┐       │   ┌───────────────┐   ┌───────────────┐
   │  Internet   │──────▶│───│   VPS         │───│   Raspberry Pi │
   │   User      │       │   │ (Caddy Proxy) │   │ (Your Services)│
-  │             │       │   │ ~$3/month     │   │                │
+  │             │       │   │ Hetzner Cloud │   │                │
   └─────────────┘       │   └───────────────┘   └───────────────┘
                         │     *.pi.junttila.dev                  │
                         └─────────────────────────────────────┘
@@ -22,13 +22,14 @@ This guide walks you through exposing services running on a home Raspberry Pi to
 - No port forwarding on your home router
 - All traffic encrypted via Tailscale
 - Automatic HTTPS via Caddy + Let's Encrypt
-- VPS cost: ~$3/month (t4g.nano)
+- VPS cost: a few euros/month (Hetzner `cx23`)
 
 ---
 
 ## Prerequisites
 
-- AWS account with CLI configured
+- Hetzner Cloud account with an API token (see `terraform-hetzner/README.md`)
+- Terraform Cloud access (state is stored in the `hetzner-vps` workspace)
 - SSH key pairs for both servers
 - Tailscale account with auth keys
 - Domain with DNS access (e.g., Squarespace)
@@ -37,41 +38,20 @@ This guide walks you through exposing services running on a home Raspberry Pi to
 
 ## Step 1: Set Up the Raspberry Pi (Backend Server)
 
-First, provision the backend server where your services will run.
+First, provision the backend server where your services will run. Install the OS and SSH access as described in the root `README.md`, then run Ansible against it.
 
-### 1.1 Generate SSH Key
-
-```bash
-ssh-keygen -t ed25519 -f ~/.ssh/ansible-lab -C "ansible-lab"
-```
-
-### 1.2 Configure Terraform
-
-```bash
-cd terraform/
-cp terraform.tfvars.example terraform.tfvars
-nano terraform.tfvars
-```
-
-### 1.3 Deploy Infrastructure
-
-```bash
-terraform init
-terraform apply
-```
-
-### 1.4 Provision with Ansible
+### 1.1 Provision with Ansible
 
 ```bash
 # Get a Tailscale auth key from https://login.tailscale.com/admin/settings/keys
-add to ENV variables or pass to script
-./scripts/provision.sh tskey-auth-xxxxx
+# add to ENV variables or pass to script
+./scripts/provision-pi.sh tskey-auth-xxxxx
 ```
 
-### 1.5 Note the Tailscale IP
-The `scripts/provision.sh` script will automatically print the Tailscale IP after it finishes. You can also get it manually:
+### 1.2 Note the Tailscale IP
+The `scripts/provision-pi.sh` script will automatically print the Tailscale IP after it finishes. You can also get it manually:
 ```bash
-ssh -i ~/.ssh/ansible-lab ubuntu@<pi-public-ip> "tailscale ip -4"
+ssh derp@<pi-local-ip> "tailscale ip -4"
 # Example: 100.100.100.2
 ```
 
@@ -82,15 +62,14 @@ ssh -i ~/.ssh/ansible-lab ubuntu@<pi-public-ip> "tailscale ip -4"
 ### 2.1 Generate SSH Key for VPS
 
 ```bash
-ssh-keygen -t ed25519 -f ~/.ssh/vps-proxy -C "vps-proxy"
+ssh-keygen -t ed25519 -f ~/.ssh/hcloud-key -C "hcloud-key"
 ```
 
 ### 2.2 Configure Terraform
 
 ```bash
-cd terraform-vps/
-cp terraform.tfvars.example terraform.tfvars
-nano terraform.tfvars
+cd terraform-hetzner/
+export TF_VAR_hcloud_token="your_hetzner_api_token"
 ```
 
 ### 2.3 Deploy VPS
@@ -100,11 +79,11 @@ terraform init
 terraform apply
 ```
 
-Note the `vps_public_ip` from the output.
+Note the `server_ipv4` from the output.
 
 ### 2.4 Configure Your Sites
 
-Create `ansible/group_vars/vps.yml`:
+Edit `ansible/inventory/group_vars/vps.yml`:
 backend is the tailscale ip of the server
 
 ```yaml
@@ -153,7 +132,7 @@ curl -I https://vaultwarden.pi.junttila.dev
 
 1. Start your service on the Pi (e.g., on port 8080)
 
-2. Add to `ansible/group_vars/vps.yml`:
+2. Add to `ansible/inventory/group_vars/vps.yml`:
    ```yaml
    - domain: newservice.pi.junttila.dev
      backend: "100.100.100.2:8080"
@@ -178,7 +157,7 @@ ping 100.100.100.2  # Pi's Tailscale IP
 
 ### Check Caddy status
 ```bash
-ssh ubuntu@<vps-ip>
+ssh -i ~/.ssh/hcloud-key derp@<vps-ip>
 sudo systemctl status caddy
 sudo journalctl -u caddy -f
 ```
@@ -200,7 +179,7 @@ curl http://100.100.100.2:80
 
 | Resource | Cost |
 |----------|------|
-| VPS (t4g.nano) | ~$3/month |
+| VPS (Hetzner `cx23`) | a few euros/month |
 | Pi (existing) | $0 |
 | Domain | varies |
 | Tailscale | Free tier |
@@ -211,10 +190,6 @@ curl http://100.100.100.2:80
 
 ```bash
 # Destroy VPS
-cd terraform-vps/
-terraform destroy
-
-# Destroy Pi (if using EC2 for testing)
-cd terraform/
+cd terraform-hetzner/
 terraform destroy
 ```
