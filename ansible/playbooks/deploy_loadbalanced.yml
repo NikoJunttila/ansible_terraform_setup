@@ -6,3 +6,4 @@
     - { role: podman, tags: podman }
     - { role: pocketbase, tags: pocketbase }
     - { role: calendar-app, tags: calendar-app }
+    - { role: junttila-dev-freelance, tags: freelance }

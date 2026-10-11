@@ -48,6 +48,20 @@
         enabled: false
       failed_when: false
 
+    # junttila.dev / freelance.junttila.dev moved to the VPS (deploy_loadbalanced.yml)
+    - name: Stop and disable junttila-dev-freelance quadlet service
+      ansible.builtin.systemd:
+        name: junttila-dev-freelance.service
+        state: stopped
+        enabled: false
+      failed_when: false
+
+    - name: Remove junttila-dev-freelance quadlet unit file
+      ansible.builtin.file:
+        path: /etc/containers/systemd/junttila-dev-freelance.container
+        state: absent
+      notify: Reload systemd
+
   handlers:
     - name: Reload systemd
       ansible.builtin.systemd:

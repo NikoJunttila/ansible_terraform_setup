@@ -69,11 +69,12 @@ caddy_sites:
   - domain: store.junttila.dev
     backend: "{{ backend_ip }}:4142"
 
+  # junttila-dev-freelance runs on this VPS (playbooks/deploy_loadbalanced.yml)
   - domain: freelance.junttila.dev
-    backend: "{{ backend_ip }}:8200"
+    backend: "{{ localhost }}:8200"
 
   - domain: junttila.dev
-    backend: "{{ backend_ip }}:8200"
+    backend: "{{ localhost }}:8200"
 
   - domain: woo.junttila.dev
     backend: "{{ backend_ip }}:8080"

@@ -12,9 +12,9 @@ Environment=NODE_ENV={{ NODE_ENV }}
 Environment=RESEND_API_KEY={{ vault_resend_api_key }}
 Environment=MOONSHOT_API_KEY={{ vault_moonshot_api_key }}
 Environment=MOONSHOT_MODEL={{ vault_moonshot_model }}
-AddHost=host.containers.internal:host-gateway
 LogDriver=journald
-LogOpt=tag={{ '{{.Name}}' }}
+# AddHost= and LogOpt= need podman >= 5; PodmanArgs works on the VPS (podman 4.9) and the Pi
+PodmanArgs=--add-host=host.containers.internal:host-gateway --log-opt=tag={{ '{{.Name}}' }}
 
 [Service]
 Restart=always
