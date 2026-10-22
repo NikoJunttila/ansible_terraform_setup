@@ -62,6 +62,27 @@
         state: absent
       notify: Reload systemd
 
+    # WooCommerce stack (podman-compose project in /opt/woocommerce) taken down
+    # 2026-10-22 after the PHP2Shell RCE (CVE-2026-109618/109619); the
+    # wordpress:latest image was PHP 8.3.31 (vulnerable). The role is commented
+    # out in pi.yml and the Caddy site in inventory/group_vars/vps.yml.
+    # Volumes woocommerce_db_data / woocommerce_wp_data and /opt/woocommerce
+    # are kept on purpose (data + forensic evidence).
+    - name: Remove WooCommerce containers (volumes are kept)
+      containers.podman.podman_container:
+        name: "{{ item }}"
+        state: absent
+      loop:
+        - woocommerce_wordpress_1
+        - woocommerce_db_1
+      tags: woocommerce
+
+    - name: Remove WooCommerce pod
+      containers.podman.podman_pod:
+        name: pod_woocommerce
+        state: absent
+      tags: woocommerce
+
   handlers:
     - name: Reload systemd
       ansible.builtin.systemd:

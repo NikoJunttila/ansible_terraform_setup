@@ -51,9 +51,10 @@
         policy: deny
 
   roles:
-    - tailscale
-    - caddy
-    - podman
+    - { role: journald, tags: journald }
+    - { role: tailscale, tags: tailscale }
+    - { role: caddy, tags: caddy }
+    - { role: podman, tags: podman }
     - { role: uptime_kuma, tags: uptime_kuma }
     - { role: autokuma, tags: autokuma }
 

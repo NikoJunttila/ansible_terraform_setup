@@ -1,3 +1,13 @@
 ---
 
 caddy_sites: []
+
+# Per-site access logs (JSON, one shared file, rotated by Caddy itself).
+# Added 2026-10-22 after the PHP2Shell incident: the VPS had no record of
+# requests to the backends, only Caddy's own error journal.
+caddy_access_log: true
+caddy_access_log_dir: /var/log/caddy
+caddy_access_log_path: "{{ caddy_access_log_dir }}/access.log"
+caddy_access_log_roll_size: 100mb
+caddy_access_log_roll_keep: 20
+caddy_access_log_roll_keep_for: 90d

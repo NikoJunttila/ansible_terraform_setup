@@ -1,0 +1,13 @@
+---
+- name: Restart journald
+  ansible.builtin.systemd:
+    name: systemd-journald
+    state: restarted
+  notify: Flush runtime journal to disk
+
+# Moves whatever is still in /run/log/journal into /var/log/journal so the
+# switch from volatile to persistent storage does not drop the current boot.
+- name: Flush runtime journal to disk
+  ansible.builtin.command:
+    cmd: journalctl --flush
+  changed_when: true

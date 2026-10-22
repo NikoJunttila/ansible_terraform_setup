@@ -49,6 +49,29 @@
     group: root
     mode: '0755'
 
+- name: Ensure access log directory exists
+  file:
+    path: "{{ caddy_access_log_dir }}"
+    state: directory
+    owner: caddy
+    group: caddy
+    mode: '0755'
+  when: caddy_access_log
+
+# Pre-create the file as the caddy user. If it is first created by something
+# running as root (e.g. `sudo caddy validate`), caddy cannot open it and the
+# reload hangs.
+- name: Ensure access log file is owned by caddy
+  file:
+    path: "{{ caddy_access_log_path }}"
+    state: touch
+    owner: caddy
+    group: caddy
+    mode: '0640'
+    modification_time: preserve
+    access_time: preserve
+  when: caddy_access_log
+
 - name: Configure Caddyfile
   template:
     src: Caddyfile.j2

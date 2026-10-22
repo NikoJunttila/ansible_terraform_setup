@@ -26,6 +26,18 @@ import /etc/caddy/sites.d/*.caddy
         {% if site.health_timeout is defined and site.health_timeout %}health_timeout {{ site.health_timeout }}{% endif %}
         {% endif %}
     }
+    {% if caddy_access_log %}
+
+    # Access log: every request to this site, JSON, rotated by Caddy.
+    log {
+        output file {{ caddy_access_log_path }} {
+            roll_size {{ caddy_access_log_roll_size }}
+            roll_keep {{ caddy_access_log_roll_keep }}
+            roll_keep_for {{ caddy_access_log_roll_keep_for }}
+        }
+        format json
+    }
+    {% endif %}
 }
 
 {% endfor %}

@@ -5,6 +5,7 @@
   gather_facts: yes
   become: yes #sudo mode
   roles:
+    - { role: journald, tags: journald }
     - { role: podman, tags: podman }
     - { role: pihole, tags: pihole }
     - { role: discordbot, tags: discordbot }
@@ -30,4 +31,8 @@
 # ansible-playbook playbooks/pi.yml --tags "calendar-app" -K --vault-password-file ~/.ansible_vault_pass
     - {role: calendar-app, tags: calendar-app}
 
-    - {role: woocommerce, tags: woocommerce}
+    # WooCommerce disabled 2026-10-22: PHP2Shell RCE (CVE-2026-109618/109619),
+    # wordpress:latest image was PHP 8.3.31 (vulnerable). Store is unused for now.
+    # Containers were removed by playbooks/decommission_unused.yml; volumes kept.
+    # Re-enable only with a patched image (PHP >= 8.3.36) and fresh wp-content review.
+    # - {role: woocommerce, tags: woocommerce}

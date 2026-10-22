@@ -4,6 +4,9 @@ backend_ip: "100.100.6.24"
 localhost: "127.0.0.1" # Localhost for services running on this VPS
 VPS_TAILSCALE_IP: "100.95.105.15"
 
+# roles/journald: keep the current ~3.7G of history, 38G disk.
+journald_system_max_use: 4G
+
 # VPS Caddy Sites Configuration
 # 
 # Define all your reverse proxy sites here.
@@ -76,8 +79,9 @@ caddy_sites:
   - domain: junttila.dev
     backend: "{{ localhost }}:8200"
 
-  - domain: woo.junttila.dev
-    backend: "{{ backend_ip }}:8080"
+  # woo.junttila.dev disabled 2026-10-22 (PHP2Shell, see playbooks/pi.yml).
+  # - domain: woo.junttila.dev
+  #   backend: "{{ backend_ip }}:8080"
 
 # Resolvers handed to containers by roles/podman. The role default (host LAN
 # address + gateway) only works on the Pi, where pihole listens there. On the

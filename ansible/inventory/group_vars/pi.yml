@@ -1,1 +1,5 @@
 #pi specific variables
+
+# roles/journald: persistent journal, ~15 MB/h of logs today (loki.service is
+# the noisiest), so 8G is roughly three weeks at current volume.
+journald_system_max_use: 8G

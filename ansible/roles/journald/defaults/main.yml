@@ -1,0 +1,11 @@
+---
+# Persistent systemd journal with a real retention window.
+# Added 2026-10-22 after the PHP2Shell incident: the Pi's journal was volatile
+# (in /run) and only held about one day of container logs, so there was no way
+# to look at requests from the exploitation window.
+#
+# Override journald_system_max_use per host in group_vars (disk size differs).
+journald_storage: persistent
+journald_system_max_use: 2G
+journald_max_retention: 90day
+journald_max_file_sec: 1day

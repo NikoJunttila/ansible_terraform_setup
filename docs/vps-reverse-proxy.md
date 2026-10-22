@@ -193,3 +193,14 @@ curl http://100.100.100.2:80
 cd terraform-hetzner/
 terraform destroy
 ```
+
+## Logs
+
+- **Caddy access log (VPS):** every request to every site in `caddy_sites`, JSON, in
+  `/var/log/caddy/access.log` (rotated by Caddy: 100 MB files, 20 kept, 90 days).
+  Example:
+  `sudo jq -c 'select(.request.host=="memos.junttila.dev") | [.ts,.request.remote_ip,.request.method,.request.uri,.status]' /var/log/caddy/access.log`
+  Sites from `/etc/caddy/sites.d/*.caddy` are not covered unless they add their own `log` block.
+- **systemd journal (both hosts):** persistent, kept 90 days or until the per-host
+  `journald_system_max_use` cap in `inventory/group_vars/` is hit, whichever comes first.
+  Container stdout on the Pi lands here: `journalctl CONTAINER_NAME=<name>`.
