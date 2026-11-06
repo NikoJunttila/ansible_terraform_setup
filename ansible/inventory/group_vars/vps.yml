@@ -38,12 +38,10 @@ caddy_sites:
     lb_policy: round_robin
     health_uri: /api/health
 
+  # calendar-app runs only on this VPS (playbooks/deploy_loadbalanced.yml).
+  # The Pi copy was dropped 2026-11-06: home internet is unreliable. DB is Turso.
   - domain: booking.junttila.dev
-    backends:
-      - "{{ backend_ip }}:5000"
-      - "{{ localhost }}:5000"
-    lb_policy: round_robin
-    health_uri: /health
+    backend: "{{ localhost }}:5000"
 
   - domain: grafana.junttila.dev
     backend: "{{ backend_ip }}:3222"
